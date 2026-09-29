@@ -2,15 +2,15 @@
   "kaggle": "https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews",
   "baseline": {
     "model": "TF-IDF (1-2 gram) + Logistic Regression",
-    "fit_seconds": 26.73,
-    "full_test": {
+    "fit_seconds": 22.64,
+    "metrics": {
       "n": 10000,
       "accuracy": 0.918,
       "macro_f1": 0.9179985534944837,
       "f1_positive": 0.9183429595698068,
       "roc_auc": 0.9747282800000001
     },
-    "jev_subset": {
+    "full_test_metrics": {
       "n": 10000,
       "accuracy": 0.918,
       "macro_f1": 0.9179985534944837,
@@ -22,7 +22,7 @@
     "model": "jev-latest",
     "shots": "0",
     "errors": 0,
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.9627,
       "macro_f1": 0.9626996863043618,
@@ -35,7 +35,7 @@
   },
   "pipeline": {
     "problem": "Classify a movie review as positive or negative",
-    "n_jev_subset": 10000,
+    "n_scored": 10000,
     "n_full_test": 10000,
     "n_train": 40000,
     "question_type": "Noul",
@@ -62,7 +62,7 @@
       8357,
       25459
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.9629,
       "macro_f1": 0.9628998660685165,
@@ -134,7 +134,7 @@
         }
       ]
     },
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.9625,
       "macro_f1": 0.9624999156248102,
@@ -159,7 +159,7 @@
       38810,
       8357
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.9633,
       "macro_f1": 0.9632999174248142,
@@ -177,14 +177,14 @@
       "kaggle": 1.172,
       "jev": 4.198
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 10000,
       "accuracy": 0.9183,
       "macro_f1": 0.9182967571982932,
       "f1_positive": 0.918811487627944,
       "roc_auc": 0.9747282800000001
     },
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.9644,
       "macro_f1": 0.9643987183538607,
@@ -199,14 +199,14 @@
       "kaggle": 0.942,
       "jev": 4.108
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 10000,
       "accuracy": 0.9182,
       "macro_f1": 0.9181970550939833,
       "f1_positive": 0.9186878727634195,
       "roc_auc": 0.9747282800000001
     },
-    "jev_subset": {
+    "metrics": {
       "n": 10000,
       "accuracy": 0.964,
       "macro_f1": 0.9639989502093881,

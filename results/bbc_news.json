@@ -2,13 +2,13 @@
   "kaggle": "https://www.kaggle.com/competitions/learn-ai-bbc",
   "baseline": {
     "model": "TF-IDF + Linear SVM",
-    "fit_seconds": 0.37,
-    "full_test": {
+    "fit_seconds": 0.45,
+    "metrics": {
       "n": 445,
       "accuracy": 0.9865168539325843,
       "macro_f1": 0.9861360064818323
     },
-    "jev_subset": {
+    "full_test_metrics": {
       "n": 445,
       "accuracy": 0.9865168539325843,
       "macro_f1": 0.9861360064818323
@@ -18,7 +18,7 @@
     "model": "jev-latest",
     "shots": "0",
     "errors": 0,
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9820224719101124,
       "macro_f1": 0.9822070759191694
@@ -31,7 +31,7 @@
   },
   "pipeline": {
     "problem": "Assign a BBC News article to one of 5 sections",
-    "n_jev_subset": 445,
+    "n_scored": 445,
     "n_full_test": 445,
     "n_train": 1780,
     "question_type": "Choice",
@@ -70,7 +70,7 @@
       788,
       1150
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9775280898876404,
       "macro_f1": 0.9775881397610645
@@ -241,7 +241,7 @@
         }
       ]
     },
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9820224719101124,
       "macro_f1": 0.982007203051501
@@ -280,7 +280,7 @@
       788,
       1150
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9752808988764045,
       "macro_f1": 0.9754351084363222
@@ -294,12 +294,12 @@
   "stack": {
     "stage2_train_rows": 1780,
     "jev_missing": 0,
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 445,
       "accuracy": 0.9865168539325843,
       "macro_f1": 0.9861360064818323
     },
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9887640449438202,
       "macro_f1": 0.9885909146502027
@@ -308,12 +308,12 @@
   "stack_cluster": {
     "stage2_train_rows": 1765,
     "jev_missing": 0,
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 445,
       "accuracy": 0.9865168539325843,
       "macro_f1": 0.9861360064818323
     },
-    "jev_subset": {
+    "metrics": {
       "n": 445,
       "accuracy": 0.9910112359550561,
       "macro_f1": 0.9905625151715993

@@ -2,15 +2,15 @@
   "kaggle": "https://www.kaggle.com/competitions/titanic",
   "baseline": {
     "model": "HistGradientBoosting + Title/FamilySize/HasCabin feature engineering",
-    "fit_seconds": 0.18,
-    "full_test": {
+    "fit_seconds": 0.16,
+    "metrics": {
       "n": 179,
       "accuracy": 0.8212290502793296,
       "macro_f1": 0.8102808691043986,
       "f1_positive": 0.7647058823529411,
       "roc_auc": 0.8411725955204217
     },
-    "jev_subset": {
+    "full_test_metrics": {
       "n": 179,
       "accuracy": 0.8212290502793296,
       "macro_f1": 0.8102808691043986,
@@ -22,7 +22,7 @@
     "model": "jev-latest",
     "shots": "0",
     "errors": 0,
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.6480446927374302,
       "macro_f1": 0.5926675094816688,
@@ -35,7 +35,7 @@
   },
   "pipeline": {
     "problem": "Predict whether a Titanic passenger survived",
-    "n_jev_subset": 179,
+    "n_scored": 179,
     "n_full_test": 179,
     "n_train": 712,
     "question_type": "Noul",
@@ -72,7 +72,7 @@
       306,
       208
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.6815642458100558,
       "macro_f1": 0.6442096453603934,
@@ -162,7 +162,7 @@
         }
       ]
     },
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.7541899441340782,
       "macro_f1": 0.7342780026990553,
@@ -189,7 +189,7 @@
       306,
       208
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.6815642458100558,
       "macro_f1": 0.6442096453603934,
@@ -207,14 +207,14 @@
       "kaggle": 1.946,
       "jev": 0.247
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 179,
       "accuracy": 0.8100558659217877,
       "macro_f1": 0.7946693657219973,
       "f1_positive": 0.7384615384615385,
       "roc_auc": 0.8411725955204217
     },
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.7932960893854749,
       "macro_f1": 0.7772808285973702,
@@ -229,14 +229,14 @@
       "kaggle": 1.674,
       "jev": 0.56
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 179,
       "accuracy": 0.8100558659217877,
       "macro_f1": 0.7946693657219973,
       "f1_positive": 0.7384615384615385,
       "roc_auc": 0.8411725955204217
     },
-    "jev_subset": {
+    "metrics": {
       "n": 179,
       "accuracy": 0.7988826815642458,
       "macro_f1": 0.7839903459372486,
