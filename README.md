@@ -54,7 +54,9 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 
 ## 結果（model `jev-latest` = `jev-1.13.0`）
 
-完整數字見 [`results/summary.md`](results/summary.md)。兩者在同一個測試子集上比較：
+完整數字見 [`results/summary.md`](results/summary.md)，開頭的 **Pipeline overview** 表格把每題的資料集、筆數、
+要解決的問題、Jev 問題定義、第一筆送進 Jev 的 state，以及 Accuracy／Macro-F1 的分組比較放在同一張表（每次執行自動重建）。
+兩者在同一個測試子集上比較：
 
 | 題目 | 筆數 | Kaggle baseline accuracy | Jev 零樣本 accuracy | Baseline AUC | Jev AUC |
 | --- | --- | --- | --- | --- | --- |

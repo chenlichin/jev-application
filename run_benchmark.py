@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import html
 import json
+import re
 import time
 from typing import Any
 
@@ -81,11 +83,86 @@ def run_jev_eval(task: Task, data, model: str, concurrency: int) -> dict[str, An
     return result
 
 
+def describe_pipeline(task: Task, data) -> dict[str, Any]:
+    """What the summary table shows about a task: its data, the Jev question, and one example state."""
+    question = task.questions["label"]
+    if question.type == "noul":
+        answers = "yes / no"
+    else:
+        answers = " / ".join(question.criteria)
+    return {
+        "problem": task.problem,
+        "n_jev_subset": len(data.jev_test),
+        "n_full_test": len(data.test),
+        "n_train": len(data.train),
+        "question_type": question.type.capitalize(),
+        "question": question.instructions,
+        "answers": answers,
+        "state_example": task.to_state(data.jev_test.iloc[0]),
+        "state_example_label": str(data.jev_test["label"].iloc[0]),
+    }
+
+
+def _truncate(text: str, limit: int) -> str:
+    return text if len(text) <= limit else text[:limit].rstrip() + " …"
+
+
+def pipeline_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
+    """HTML table (GitHub renders it) with metric columns grouped under shared headers."""
+    fmt = lambda v: "—" if v is None else f"{v:.3f}"
+    rows = [
+        "<table>",
+        "<thead>",
+        "<tr>",
+        '<th rowspan="2">Dataset</th><th rowspan="2">n</th><th rowspan="2">Problem</th>',
+        '<th rowspan="2">Jev question</th><th rowspan="2">State (first row)</th>',
+        '<th colspan="3">Accuracy</th><th colspan="2">Macro-F1</th>',
+        "</tr>",
+        "<tr>",
+        "<th>Kaggle</th><th>Jev zero-shot</th><th>Kaggle full test</th>",
+        "<th>Kaggle</th><th>Jev zero-shot</th>",
+        "</tr>",
+        "</thead>",
+        "<tbody>",
+    ]
+    for name, res in all_results.items():
+        p = res.get("pipeline")
+        if p is None:
+            continue
+        base, full = res.get("baseline", {}).get("jev_subset", {}), res.get("baseline", {}).get("full_test", {})
+        jev = res.get("jev", {}).get("jev_subset", {})
+        state = html.escape(_truncate(json.dumps(p["state_example"], ensure_ascii=False), 160))
+        # Markdown is not rendered inside an HTML block, so `state` paths become <code> explicitly.
+        question = re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(p["question"]))
+        rows += [
+            "<tr>",
+            f'<td><a href="{res["kaggle"]}">{name}</a></td>',
+            f'<td>{p["n_jev_subset"]}<br><sub>full test {p["n_full_test"]}<br>train {p["n_train"]}</sub></td>',
+            f"<td>{html.escape(p['problem'])}</td>",
+            f"<td><b>{p['question_type']}</b>: {question}<br><sub>answers: {html.escape(p['answers'])}</sub></td>",
+            f"<td><code>{state}</code><br><sub>true label: {html.escape(p['state_example_label'])}</sub></td>",
+            f"<td>{fmt(base.get('accuracy'))}</td><td>{fmt(jev.get('accuracy'))}</td><td>{fmt(full.get('accuracy'))}</td>",
+            f"<td>{fmt(base.get('macro_f1'))}</td><td>{fmt(jev.get('macro_f1'))}</td>",
+            "</tr>",
+        ]
+    rows += ["</tbody>", "</table>"]
+    return rows
+
+
 def write_summary() -> None:
     """Summarise every task that has a results file, not only the tasks run this time."""
     all_results = {name: json.loads(p.read_text()) for name in TASKS if (p := RESULTS_DIR / f"{name}.json").exists()}
     lines = [
         "# Kaggle × Jev benchmark results",
+        "",
+        "## Pipeline overview",
+        "",
+        "`n` is the stratified test subset both methods are scored on. Kaggle columns are the classic",
+        "Kaggle solution trained on the 80% train split; Jev is zero-shot and never sees training labels.",
+        "",
+        *pipeline_table(all_results),
+        "",
+        "## All metrics",
         "",
         "Same stratified test subset for both methods (`jev_subset`). The baseline also reports the full 20% test split.",
         "",
@@ -127,6 +204,7 @@ def main() -> None:
         path = RESULTS_DIR / f"{name}.json"
         res: dict[str, Any] = json.loads(path.read_text()) if path.exists() else {}
         res["kaggle"] = task.kaggle
+        res["pipeline"] = describe_pipeline(task, data)
         if args.mode == "dry-run":
             example = request_payload(task, data.jev_test.iloc[0], args.model)
             (RESULTS_DIR / f"{name}_request_example.json").write_text(json.dumps(example, indent=2, ensure_ascii=False))

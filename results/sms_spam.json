@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset",
   "baseline": {
     "model": "TF-IDF + Multinomial Naive Bayes",
-    "fit_seconds": 0.06,
+    "fit_seconds": 0.07,
     "full_test": {
       "n": 1115,
       "accuracy": 0.9847533632286996,
@@ -31,5 +31,18 @@
     "latency_p50_s": 0.286,
     "latency_p95_s": 0.46,
     "input_tokens_total": 75034
+  },
+  "pipeline": {
+    "problem": "Detect whether an SMS message is spam",
+    "n_jev_subset": 200,
+    "n_full_test": 1115,
+    "n_train": 4457,
+    "question_type": "Noul",
+    "question": "Is `sms` a spam text message?",
+    "answers": "yes / no",
+    "state_example": {
+      "sms": "Aight I'll grab something to eat too, text me when you're back at mu"
+    },
+    "state_example_label": "0"
   }
 }

@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/competitions/learn-ai-bbc",
   "baseline": {
     "model": "TF-IDF + Linear SVM",
-    "fit_seconds": 0.48,
+    "fit_seconds": 0.49,
     "full_test": {
       "n": 445,
       "accuracy": 0.9865168539325843,
@@ -27,5 +27,18 @@
     "input_tokens_total": 181042,
     "accuracy_when_confidence_ge_0.8": 0.9946524064171123,
     "share_confidence_ge_0.8": 0.935
+  },
+  "pipeline": {
+    "problem": "Assign a BBC News article to one of 5 sections",
+    "n_jev_subset": 200,
+    "n_full_test": 445,
+    "n_train": 1780,
+    "question_type": "Choice",
+    "question": "Which BBC News section does `article` belong to?",
+    "answers": "business / entertainment / politics / sport / tech",
+    "state_example": {
+      "article": "ministers  naive  over phone-taps the government is being naive by refusing to allow phone-tap evidence in court  a senior eu politician says.  javier solana  eu foreign policy chief  says phone-tap evidence works in the courts of other european countries. human rights groups  top police officers and many mps say allowing the evidence would remove the need to detain terror suspects without charge. but home secretary charles clarke says the evidence would not make much difference to these cases. mr solana told itv1 s jonathan dimbleby programme:  [phone-tap evidence in court] works  it is normal that it is done  it would be naive not to do it.  it would be naive not to use this technological thing that we have at our disposal.  mr solana s comments come the day after sir ian blair  the newly-appointed metropolitan police commissioner  said he was in favour of phone-tap evidence.  under the anti-terrorism crimes and security act 2001  foreign terror suspects can be detained in british jails without trial or charge. several suspects have been detained under these powers because evidence against them was deemed too sensitive to be heard in court.  some of this evidence is believed to be telephone intercepts. human rights group liberty has argued that if intercept evidence could be heard  these detainees could be brought to trial. but critics of phone-tap trials say the evidence is often weak and can expose the methods of the security services. the home secretary says intercepts would not make much difference because cases against terror suspects frequently rely on other kinds of surveillance. but mr clarke has been forced to change the regime of detention without trial after law lords ruled it illegal. he has opted for a system of  control orders  whereby suspects  both british and foreign  can be held under house arrest or surveillance. these orders will again involve a uk opt-out of parts of the european convention on human rights. while accepting that people  have to be prepared  for a possible terrorist attack  mr solana said he had  qualms  about the home secretary s new plans.  we have to fight terrorism with all our means  but not so far as to change our way of life   he said."
+    },
+    "state_example_label": "politics"
   }
 }
