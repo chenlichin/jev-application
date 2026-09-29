@@ -13,5 +13,19 @@
       "accuracy": 0.9333333333333333,
       "macro_f1": 0.9333333333333332
     }
+  },
+  "jev": {
+    "model": "jev-latest",
+    "errors": 0,
+    "jev_subset": {
+      "n": 30,
+      "accuracy": 0.6,
+      "macro_f1": 0.49350649350649345
+    },
+    "latency_p50_s": 0.349,
+    "latency_p95_s": 0.734,
+    "input_tokens_total": 11910,
+    "accuracy_when_confidence_ge_0.8": 1.0,
+    "share_confidence_ge_0.8": 0.3333333333333333
   }
 }

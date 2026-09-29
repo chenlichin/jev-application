@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/competitions/learn-ai-bbc",
   "baseline": {
     "model": "TF-IDF + Linear SVM",
-    "fit_seconds": 0.43,
+    "fit_seconds": 0.48,
     "full_test": {
       "n": 445,
       "accuracy": 0.9865168539325843,
@@ -13,5 +13,19 @@
       "accuracy": 0.99,
       "macro_f1": 0.9896404891828233
     }
+  },
+  "jev": {
+    "model": "jev-latest",
+    "errors": 0,
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.985,
+      "macro_f1": 0.9851195174788799
+    },
+    "latency_p50_s": 0.287,
+    "latency_p95_s": 0.358,
+    "input_tokens_total": 181042,
+    "accuracy_when_confidence_ge_0.8": 0.9946524064171123,
+    "share_confidence_ge_0.8": 0.935
   }
 }

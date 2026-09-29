@@ -52,18 +52,48 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 官方 Python SDK 是 [`typesafe-sdk`](https://pypi.org/project/typesafe-sdk/)（`import typesafe_sdk`），
 不是 `typesafe` 或 `typesafe-ai`（後兩者分別是無關套件與防搶註的轉址套件）。
 
-## 目前結果
+## 結果（model `jev-latest` = `jev-1.13.0`）
 
-Baseline 已跑完（見 [`results/summary.md`](results/summary.md)）：
+完整數字見 [`results/summary.md`](results/summary.md)。兩者在同一個測試子集上比較：
 
-| 題目 | Baseline accuracy（Jev 子集） | Baseline accuracy（完整測試集） | Jev |
-| --- | --- | --- | --- |
-| Titanic | 0.821 | 0.821 | 待跑 |
-| SMS Spam | 0.980 | 0.985 | 待跑 |
-| IMDB | 0.910 | 0.918 | 待跑 |
-| BBC News | 0.990 | 0.987 | 待跑 |
-| Iris | 0.933 | 0.933 | 待跑 |
+| 題目 | 筆數 | Kaggle baseline accuracy | Jev 零樣本 accuracy | Baseline AUC | Jev AUC |
+| --- | --- | --- | --- | --- | --- |
+| IMDB 影評 | 200 | 0.910 | **0.950** | 0.979 | **0.991** |
+| SMS Spam | 200 | **0.980** | 0.975 | 0.967 | **0.981** |
+| BBC News | 200 | **0.990** | 0.985 | — | — |
+| Titanic | 179 | **0.821** | 0.648 | **0.841** | 0.749 |
+| Iris | 30 | **0.933** | 0.600 | — | — |
 
-**Jev 的數字還沒有**：建立這個 repo 的雲端環境網路政策擋住了 `api.typesafe.ai`，也沒有設定 `TYPESAFE_API_KEY`。
-程式的 Jev 路徑已用假 key 測過（連線失敗會被記錄成 error、不會寫進快取，重跑會自動補送）。
-只要在有網路與 API key 的環境執行 `python run_benchmark.py --mode jev` 即可補上。
+每次呼叫 p50 延遲約 0.29 秒、p95 約 0.36–0.73 秒，1,000 次呼叫 0 失敗。
+
+### 觀察
+
+- **文字題（IMDB、SMS、BBC）：Jev 零樣本就與用上千、上萬筆訓練資料的 Kaggle 解法打平甚至更好。**
+  IMDB 準確率高出 4 個百分點；SMS 的 AUC 更高；BBC 只差 1 筆。
+  BBC 中 93.5% 的答案信心 ≥ 0.8，這部分準確率 99.5%，信心可以拿來決定哪些要人工複查。
+- **Titanic：Jev 沒有抓到「婦孺優先」。** 女性平均生還機率只給 0.40（實際 0.74），男性 0.33（實際 0.20），
+  幾乎沒有區分性別；機率整體偏低，門檻 0.5 時只預測 25% 生還（實際 38%）。
+  AUC 0.75 表示排序有一定資訊，若門檻改為 0.4 準確率可到 0.73——但這個門檻是在測試集上看出來的，只能當診斷，不能當成績。
+- **Iris：Jev 從來沒有預測 virginica。** 10 朵 virginica 全被判為 versicolor，setosa 則全對。
+  純數值、需要從資料學邊界的問題不是 Jev 的用途；照 TypeSafe 的建議，這類規則應留在程式碼（或傳統模型）裡。
+
+### 結論
+
+Jev 適合取代「需要理解語意」的文字分類模型，而且不需要訓練資料；
+表格／數值題則應繼續用傳統模型，或把 Jev 的判斷當成額外特徵交給傳統模型。
+
+### 下一步可以試
+
+1. **混合模型**：把 Jev 的 `noul` 機率當成特徵加進 Titanic 的梯度提升樹，看是否超過單獨的 baseline。
+2. **門檻校正**：用訓練集（而非測試集）挑 Jev 的決策門檻。
+3. `--model jev-preview` 比較預覽版。
+4. `--jev-n 0` 跑完整測試集，縮小 200 筆子集的誤差範圍。
+
+## 在 Claude Code 雲端環境執行
+
+API key 以 Bearer credential 存在環境設定（Allowed website `api.typesafe.ai`），由代理在送出時注入，
+容器內看不到 key。SDK 仍要求 `TYPESAFE_API_KEY` 有值，所以隨便給一個佔位值即可：
+
+```bash
+TYPESAFE_API_KEY=injected-by-proxy python run_benchmark.py --mode jev
+```
