@@ -1,0 +1,21 @@
+{
+  "kaggle": "https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews",
+  "baseline": {
+    "model": "TF-IDF (1-2 gram) + Logistic Regression",
+    "fit_seconds": 31.15,
+    "full_test": {
+      "n": 10000,
+      "accuracy": 0.918,
+      "macro_f1": 0.9179985534944837,
+      "f1_positive": 0.9183429595698068,
+      "roc_auc": 0.9747282800000001
+    },
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.91,
+      "macro_f1": 0.9099639855942376,
+      "f1_positive": 0.9117647058823529,
+      "roc_auc": 0.9787
+    }
+  }
+}
