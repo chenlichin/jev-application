@@ -167,28 +167,46 @@ def _cell(text: str) -> str:
     return " ".join(text.split()).replace("|", "\\|")
 
 
-def pipeline_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
-    """Plain Markdown table; each metric column is prefixed with its group ("Accuracy · Kaggle")."""
-    fmt = lambda v: "—" if v is None else f"{v:.3f}"
-    methods = jev_methods(all_results)
-    acc_cols = ["Kaggle", *(label for _, label in methods), "Kaggle full test"]
-    f1_cols = ["Kaggle", *(label for _, label in methods)]
-    header = ["Dataset", "n", "Problem", "Jev question", "State (first row)", "True label"]
-    header += [f"Accuracy · {c}" for c in acc_cols] + [f"Macro-F1 · {c}" for c in f1_cols]
-    rows = ["| " + " | ".join(header) + " |", "| " + " | ".join(["---"] * 6 + ["---:"] * (len(header) - 6)) + " |"]
+def _row(cells: list[str]) -> str:
+    return "| " + " | ".join(_cell(c) for c in cells) + " |"
+
+
+def overview_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
+    """Per task: dataset, size, problem, the Jev question, and the first state sent to Jev."""
+    rows = [
+        _row(["Dataset", "n", "Train", "Problem", "Jev question", "State (first row)", "True label"]),
+        "| --- | ---: | ---: | --- | --- | --- | --- |",
+    ]
     for name, res in all_results.items():
         p = res.get("pipeline")
         if p is None:
             continue
-        base, full = res.get("baseline", {}).get("jev_subset", {}), res.get("baseline", {}).get("full_test", {})
-        jevs = [res.get(key, {}).get("jev_subset", {}) for key, _ in methods]
         # Backticks would end the code span early, so they are dropped from the example state.
         state = _truncate(json.dumps(p["state_example"], ensure_ascii=False).replace("`", ""), 110)
         question = f"**{p['question_type']}**: {p['question']} ({p['answers']})"
-        cells = [f"[{name}]({res['kaggle']})", str(p["n_jev_subset"]), p["problem"], question, f"`{state}`", p["state_example_label"]]
-        cells += [fmt(base.get("accuracy")), *(fmt(j.get("accuracy")) for j in jevs), fmt(full.get("accuracy"))]
-        cells += [fmt(base.get("macro_f1")), *(fmt(j.get("macro_f1")) for j in jevs)]
-        rows.append("| " + " | ".join(_cell(c) for c in cells) + " |")
+        rows.append(
+            _row([f"[{name}]({res['kaggle']})", str(p["n_jev_subset"]), str(p["n_train"]), p["problem"], question,
+                  f"`{state}`", p["state_example_label"]])
+        )
+    return rows
+
+
+def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[str]:
+    """One metric across every method; the best score on the shared subset is bold."""
+    methods = jev_methods(all_results)
+    header = ["Dataset", "n", "Kaggle", *(label for _, label in methods), "Kaggle full test"]
+    rows = [_row(header), "| --- | " + " | ".join(["---:"] * (len(header) - 1)) + " |"]
+    for name, res in all_results.items():
+        p = res.get("pipeline")
+        base = res.get("baseline", {}).get("jev_subset", {}).get(metric)
+        if p is None or base is None:  # ROC AUC exists only for the binary tasks
+            continue
+        scores = [base, *(res.get(key, {}).get("jev_subset", {}).get(metric) for key, _ in methods)]
+        # Compared at the displayed precision, so scores that print the same are marked the same.
+        best = max(round(v, 3) for v in scores if v is not None)
+        cells = ["—" if v is None else f"**{v:.3f}**" if round(v, 3) == best else f"{v:.3f}" for v in scores]
+        full = res.get("baseline", {}).get("full_test", {}).get(metric)
+        rows.append(_row([name, str(p["n_jev_subset"]), *cells, "—" if full is None else f"{full:.3f}"]))
     return rows
 
 
@@ -199,39 +217,38 @@ def write_summary() -> None:
     lines = [
         "# Kaggle × Jev benchmark results",
         "",
-        "## Pipeline overview",
+        "`n` is the stratified test subset every method is scored on; \"Kaggle full test\" is the whole 20% test split.",
+        "Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;",
+        "Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes",
+        "one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.",
+        "Examples always come from the train split. Bold marks the best score on the shared subset.",
         "",
-        "`n` is the stratified test subset both methods are scored on; \"Kaggle full test\" is the whole 20% test split.",
-        "Kaggle columns are the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training",
-        "labels; Jev k-shot adds k labeled training examples per class to each answer's criteria (never test rows).",
-        "Row counts for every split are in `results/<task>.json` under `pipeline`.",
+        "## 1. Summary",
         "",
-        *pipeline_table(all_results),
+        *overview_table(all_results),
         "",
-        "## All metrics",
+        "## 2. Accuracy",
         "",
-        "Same stratified test subset for every method (`jev_subset`). The baseline also reports the full 20% test split.",
+        *metric_table(all_results, "accuracy"),
         "",
-        "| Task | Metric | Kaggle baseline (subset) | "
-        + " | ".join(f"{label} (subset)" for _, label in methods)
-        + " | Baseline (full test) |",
-        "| --- | --- | --- | " + " | ".join("---" for _ in methods) + " | --- |",
+        "## 3. Macro-F1",
+        "",
+        *metric_table(all_results, "macro_f1"),
+        "",
+        "## 4. ROC AUC (binary tasks)",
+        "",
+        "Uses the Kaggle model's positive-class score and Jev's `noul` probability.",
+        "",
+        *metric_table(all_results, "roc_auc"),
+        "",
+        "## Run details",
+        "",
     ]
-    fmt = lambda v: "—" if v is None else f"{v:.4f}"
-    for name, res in all_results.items():
-        task = TASKS[name]
-        keys = ["accuracy", "macro_f1"] + (["roc_auc"] if task.kind == "binary" else [])
-        for k in keys:
-            b = res.get("baseline", {}).get("jev_subset", {}).get(k)
-            js = [res.get(key, {}).get("jev_subset", {}).get(k) for key, _ in methods]
-            f = res.get("baseline", {}).get("full_test", {}).get(k)
-            lines.append(f"| {name} | {k} | {fmt(b)} | " + " | ".join(fmt(j) for j in js) + f" | {fmt(f)} |")
-    lines.append("")
     for name, res in all_results.items():
         for key, label in methods:
             if key in res:
                 details = {k: v for k, v in res[key].items() if k not in ("jev_subset", "shot_train_rows", "clustering")}
-                lines.append(f"- **{name}** {label} details: `{json.dumps(details, ensure_ascii=False)}`")
+                lines.append(f"- **{name}** {label}: `{json.dumps(details, ensure_ascii=False)}`")
     (RESULTS_DIR / "summary.md").write_text("\n".join(lines) + "\n")
 
 
