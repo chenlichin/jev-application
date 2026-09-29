@@ -41,6 +41,14 @@
   就是靠近決策邊界的「邊緣 pattern」。分群結果記在 `results/<task>.json` 的 `jev_cluster.clustering`。
 - **對照組（`--shots cluster-random`）**：每類抽**與 cluster 相同數量**的隨機例子，
   用來區分「多樣性」與「單純例子變多」的效果。
+- **Stacking（`--mode stack`）**：把 Jev 的機率當成特徵，和 Kaggle 模型的分數一起餵給第二階段的邏輯迴歸。
+  - 第一階段：Kaggle 模型以 5-fold 交叉驗證在訓練集上產生 out-of-fold 分數（每筆的分數都來自沒看過它的模型）；
+    測試集分數來自用整個訓練集訓練的模型。
+  - Jev：在最多 2,000 筆分層抽樣的訓練資料上取得機率（Titanic、Iris 用全部訓練資料），測試集沿用快取。
+    用 cluster-shot 時，被當成例子的訓練列不會進入第二階段，避免洩漏。
+  - 第二階段：`StandardScaler + LogisticRegression`，輸入是兩者的 logit（多分類是每個類別一欄）。
+  - **對照組**：同樣的第二階段只用 Kaggle 分數（記在 `stage2_kaggle_only`）。
+    重新訓練本身會改變決策門檻，比較 Jev 的貢獻要和這個對照組比。
 - **避免作弊**：
   - Titanic 不送乘客全名，只送稱謂（Mr/Mrs/Miss…），以免 Jev 靠記憶認出真實人物。
   - Iris 的選項描述只有物種名稱，不寫花瓣長度門檻，否則等於是我們自己寫規則，而不是 Jev 的判斷。
@@ -53,6 +61,7 @@ jev_bench/datasets.py    下載（Kaggle 檔案的 GitHub 鏡像）、載入、�
 jev_bench/tasks.py       每題的 baseline pipeline 與 Jev 的 state / question / 解碼
 jev_bench/few_shot.py    從訓練集挑例子、把例子掛到 criteria 上
 jev_bench/cluster_shots.py  k-means 分群 × 類別交集挑例子，以及數量相同的隨機對照組
+jev_bench/stacking.py    Kaggle out-of-fold 分數 + Jev 機率的第二階段模型，以及只用 Kaggle 分數的對照組
 jev_bench/jev_runner.py  非同步呼叫 Jev（可設並行數），答案快取在 .cache/jev/，重跑不重複計費
 run_benchmark.py         CLI，輸出 results/<task>.json 與 results/summary.md
 ```
@@ -70,6 +79,7 @@ python run_benchmark.py --mode jev --jev-n 0     # 跑 Jev（完整測試集）�
 python run_benchmark.py --mode jev --jev-n 200   # 只抽 200 筆分層子集，省呼叫次數
 python run_benchmark.py --mode jev --shots 0 3   # 同時跑 0-shot 與每類 3 個例子的 3-shot
 python run_benchmark.py --mode jev --shots cluster cluster-random   # 分群挑例子 + 數量相同的隨機對照
+python run_benchmark.py --mode stack --concurrency 32   # Kaggle + Jev stacking（0-shot 與 cluster 兩種特徵）
 python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 ```
 
@@ -131,9 +141,29 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 - **文字題沒有差別。** 高維文字的 silhouette 只有 0.02–0.08，分群本身就不太明確
   （IMDB 只分出 2 群，SMS／BBC 都頂到上限 8 群）。
 
+### Stacking：把 Jev 機率當特徵加進 Kaggle 模型
+
+| 題目 | n | Accuracy · Kaggle | Accuracy · Jev 0-shot | Accuracy · 第二階段只用 Kaggle（對照） | Accuracy · Kaggle + Jev 0-shot | Accuracy · Kaggle + Jev cluster | AUC · 對照 | AUC · Kaggle + Jev 0-shot | AUC · Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| SMS Spam | 1,115 | 0.985 | 0.979 | 0.985 | **0.992** | 0.991 | 0.992 | **0.994** | 0.993 |
+| BBC News | 445 | 0.987 | 0.982 | 0.987 | 0.989 | **0.991** | — | — | — |
+| IMDB | 10,000 | 0.918 | 0.963 | 0.918 | **0.964** | **0.964** | 0.975 | **0.994** | **0.994** |
+| Titanic | 179 | **0.821** | 0.648 | 0.810 | 0.793 | 0.799 | 0.841 | 0.847 | **0.859** |
+| Iris | 30 | 0.933 | 0.600 | 0.967 | 0.967 | **1.000** | — | — | — |
+
+- **SMS：兩者互補，得到全場最佳。** 0.992 高於 Kaggle 單獨的 0.985 與 Jev 單獨的 0.979，
+  1,115 封中比 Kaggle 多對 8 封；第二階段給 Jev 的權重（3.07）比 Kaggle（1.89）還高。
+- **BBC：小幅提升**，0.987 → 0.991（445 篇中多對 2 篇）。
+- **IMDB：幾乎等於 Jev 單獨**（0.963 → 0.964）。第二階段給 Jev 的權重約是 Kaggle 的 4 倍，
+  Kaggle 模型能補的資訊很少。
+- **Titanic：排序變好、準確率沒變好。** AUC 0.841 → 0.859，但 accuracy 比對照組少 2 位乘客；
+  第二階段仍主要依賴 Kaggle 分數（權重 1.67 vs Jev 0.56）。
+- **Iris：** cluster 特徵讓 30 朵全對，但只比對照組多 1 朵。注意光是重新訓練第二階段就從 0.933 變成 0.967。
+
 ### 結論
 
-- **文字分類：直接用 Jev 0-shot。** IMDB 明顯勝過 Kaggle 解法，SMS、BBC 打平，而且完全不需要訓練資料；
+- **文字分類：直接用 Jev 0-shot；要榨出最後一點準確率就做 stacking。**
+  SMS、BBC 的 stacking 都超過兩者單獨的表現。 IMDB 明顯勝過 Kaggle 解法，SMS、BBC 打平，而且完全不需要訓練資料；
   加例子只會增加成本。
 - **表格／數值題：Kaggle 傳統模型仍然較好。** 若要用 Jev，務必加例子，而且用「分群挑邊緣例子」比隨機挑更好；
   或把 Jev 的判斷當成額外特徵交給傳統模型。
