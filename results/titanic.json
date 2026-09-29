@@ -199,5 +199,49 @@
     "latency_p50_s": 0.273,
     "latency_p95_s": 0.512,
     "input_tokens_total": 201955
+  },
+  "stack": {
+    "stage2_train_rows": 712,
+    "jev_missing": 0,
+    "stage2_weight": {
+      "kaggle": 1.946,
+      "jev": 0.247
+    },
+    "stage2_kaggle_only": {
+      "n": 179,
+      "accuracy": 0.8100558659217877,
+      "macro_f1": 0.7946693657219973,
+      "f1_positive": 0.7384615384615385,
+      "roc_auc": 0.8411725955204217
+    },
+    "jev_subset": {
+      "n": 179,
+      "accuracy": 0.7932960893854749,
+      "macro_f1": 0.7772808285973702,
+      "f1_positive": 0.7175572519083969,
+      "roc_auc": 0.8467720685111989
+    }
+  },
+  "stack_cluster": {
+    "stage2_train_rows": 706,
+    "jev_missing": 0,
+    "stage2_weight": {
+      "kaggle": 1.674,
+      "jev": 0.56
+    },
+    "stage2_kaggle_only": {
+      "n": 179,
+      "accuracy": 0.8100558659217877,
+      "macro_f1": 0.7946693657219973,
+      "f1_positive": 0.7384615384615385,
+      "roc_auc": 0.8411725955204217
+    },
+    "jev_subset": {
+      "n": 179,
+      "accuracy": 0.7988826815642458,
+      "macro_f1": 0.7839903459372486,
+      "f1_positive": 0.7272727272727273,
+      "roc_auc": 0.8590250329380763
+    }
   }
 }
