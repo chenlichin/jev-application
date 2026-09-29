@@ -20,6 +20,7 @@
   },
   "jev": {
     "model": "jev-latest",
+    "shots_per_class": 0,
     "errors": 0,
     "jev_subset": {
       "n": 200,
@@ -44,5 +45,28 @@
       "sms": "Aight I'll grab something to eat too, text me when you're back at mu"
     },
     "state_example_label": "0"
+  },
+  "jev_3shot": {
+    "model": "jev-latest",
+    "shots_per_class": 3,
+    "errors": 0,
+    "shot_train_rows": [
+      2118,
+      1427,
+      3042,
+      815,
+      2245,
+      4235
+    ],
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.975,
+      "macro_f1": 0.9472990777338604,
+      "f1_positive": 0.9090909090909091,
+      "roc_auc": 0.9820166987797045
+    },
+    "latency_p50_s": 0.275,
+    "latency_p95_s": 0.367,
+    "input_tokens_total": 149634
   }
 }

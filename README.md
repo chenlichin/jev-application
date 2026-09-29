@@ -22,6 +22,16 @@
 - **Jev 是零樣本**：Jev 看不到任何訓練標籤，只收到單筆資料的 `state` 和一個有型別的問題。
   - 二分類用 `Noul`，取 `noul ≥ 0.5` 為正類，並用 `noul` 機率算 ROC AUC。
   - 多分類用 `Choice`，取 `choice` 為預測，另外統計 `confidence ≥ 0.8` 時的準確率與覆蓋率。
+- **Few-shot（`--shots k`）**：從**訓練集**每類抽 k 筆有標籤的例子（固定 seed，所有測試資料共用同一組），
+  附加到該答案的 criteria 裡；instructions 不變，所以 k-shot 與 0-shot 只差在例子：
+  ```json
+  "criteria": {
+    "true":  {"description": "The passenger survived the sinking.", "examples": [{"passenger": {...}}, ...]},
+    "false": {"description": "The passenger died in the sinking.",  "examples": [...]}
+  }
+  ```
+  優先挑短的例子（JSON ≤ 700 字）；沒有夠短的（BBC 幾乎全部）就把例子裡的文字截到前 600 字。
+  用到的訓練列 index 記在 `results/<task>.json` 的 `shot_train_rows`，可重現、可確認沒有測試資料混入。
 - **避免作弊**：
   - Titanic 不送乘客全名，只送稱謂（Mr/Mrs/Miss…），以免 Jev 靠記憶認出真實人物。
   - Iris 的選項描述只有物種名稱，不寫花瓣長度門檻，否則等於是我們自己寫規則，而不是 Jev 的判斷。
@@ -32,6 +42,7 @@
 ```
 jev_bench/datasets.py    下載（Kaggle 檔案的 GitHub 鏡像）、載入、分層切分
 jev_bench/tasks.py       每題的 baseline pipeline 與 Jev 的 state / question / 解碼
+jev_bench/few_shot.py    從訓練集挑例子、把例子掛到 criteria 上
 jev_bench/jev_runner.py  非同步呼叫 Jev（可設並行數），答案快取在 .cache/jev/，重跑不重複計費
 run_benchmark.py         CLI，輸出 results/<task>.json 與 results/summary.md
 ```
@@ -46,6 +57,7 @@ python run_benchmark.py --mode dry-run           # 輸出每題送給 Jev 的範
 
 export TYPESAFE_API_KEY=...                       # 在 https://typesafe.ai 取得
 python run_benchmark.py --mode jev --jev-n 200   # 跑 Jev，結果合併進 results/ 並更新 summary.md
+python run_benchmark.py --mode jev --shots 0 3   # 同時跑 0-shot 與每類 3 個例子的 3-shot
 python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 ```
 
@@ -56,15 +68,15 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 
 完整數字見 [`results/summary.md`](results/summary.md)，開頭的 **Pipeline overview** 表格把每題的資料集、筆數、
 要解決的問題、Jev 問題定義、第一筆送進 Jev 的 state，以及 Accuracy／Macro-F1 的分組比較放在同一張表（每次執行自動重建）。
-兩者在同一個測試子集上比較：
+所有方法在同一個測試子集上比較：
 
-| 題目 | 筆數 | Kaggle baseline accuracy | Jev 零樣本 accuracy | Baseline AUC | Jev AUC |
-| --- | --- | --- | --- | --- | --- |
-| IMDB 影評 | 200 | 0.910 | **0.950** | 0.979 | **0.991** |
-| SMS Spam | 200 | **0.980** | 0.975 | 0.967 | **0.981** |
-| BBC News | 200 | **0.990** | 0.985 | — | — |
-| Titanic | 179 | **0.821** | 0.648 | **0.841** | 0.749 |
-| Iris | 30 | **0.933** | 0.600 | — | — |
+| 題目 | 筆數 | Accuracy · Kaggle | Accuracy · Jev 0-shot | Accuracy · Jev 3-shot | AUC · Kaggle | AUC · Jev 0-shot | AUC · Jev 3-shot | Tokens · 0-shot → 3-shot |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| IMDB 影評 | 200 | 0.910 | **0.950** | **0.950** | 0.979 | 0.991 | **0.991** | 121k → 284k（×2.3） |
+| SMS Spam | 200 | **0.980** | 0.975 | 0.975 | 0.967 | 0.981 | **0.982** | 75k → 150k（×2.0） |
+| BBC News | 200 | **0.990** | 0.985 | 0.980 | — | — | — | 181k → 633k（×3.5） |
+| Titanic | 179 | **0.821** | 0.648 | 0.682 | **0.841** | 0.749 | 0.783 | 80k → 202k（×2.5） |
+| Iris | 30 | **0.933** | 0.600 | 0.900 | — | — | — | 12k → 27k（×2.3） |
 
 每次呼叫 p50 延遲約 0.29 秒、p95 約 0.36–0.73 秒，1,000 次呼叫 0 失敗。
 
@@ -79,17 +91,29 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 - **Iris：Jev 從來沒有預測 virginica。** 10 朵 virginica 全被判為 versicolor，setosa 則全對。
   純數值、需要從資料學邊界的問題不是 Jev 的用途；照 TypeSafe 的建議，這類規則應留在程式碼（或傳統模型）裡。
 
+### Few-shot 的效果（每類 3 個例子）
+
+- **Iris 大幅改善：0.60 → 0.90。** 0-shot 時 Jev 不知道三個品種的尺寸分界、從不預測 virginica；
+  看了 9 朵有標籤的花之後，已接近 Kaggle 模型的 0.933（30 筆中只差 1 朵）。
+- **Titanic 小幅改善：accuracy 0.648 → 0.682、AUC 0.749 → 0.783。** 例子讓性別差距拉開一些
+  （女性平均生還機率 0.40 → 0.46、男性 0.33 → 0.30），但 6 個例子仍不足以學到「婦孺優先」的強度，離 0.821 還遠。
+- **文字題幾乎不變**：IMDB、SMS 持平（AUC 微升），BBC 少對 1 筆（200 筆內的差異，屬於雜訊範圍）。
+  0-shot 已經很好，例子帶來的資訊有限，token 成本卻變成 2–3.5 倍。
+
+**建議**：文字題用 0-shot 就好；數值／表格題 few-shot 有明顯幫助，是值得付的 token 成本。
+
 ### 結論
 
 Jev 適合取代「需要理解語意」的文字分類模型，而且不需要訓練資料；
-表格／數值題則應繼續用傳統模型，或把 Jev 的判斷當成額外特徵交給傳統模型。
+表格／數值題靠 few-shot 可以縮小差距（Iris 幾乎追平），但目前仍以傳統模型為佳，或把 Jev 的判斷當成額外特徵交給傳統模型。
 
 ### 下一步可以試
 
 1. **混合模型**：把 Jev 的 `noul` 機率當成特徵加進 Titanic 的梯度提升樹，看是否超過單獨的 baseline。
 2. **門檻校正**：用訓練集（而非測試集）挑 Jev 的決策門檻。
-3. `--model jev-preview` 比較預覽版。
-4. `--jev-n 0` 跑完整測試集，縮小 200 筆子集的誤差範圍。
+3. **更多例子 / 動態例子**：`--shots 10` 看 Titanic 能否繼續進步；或改成針對每筆測試資料，從訓練集挑最相似的例子（kNN few-shot）。
+4. `--model jev-preview` 比較預覽版。
+5. `--jev-n 0` 跑完整測試集，縮小 200 筆子集的誤差範圍。
 
 ## 在 Claude Code 雲端環境執行
 
@@ -97,5 +121,5 @@ API key 以 Bearer credential 存在環境設定（Allowed website `api.typesafe
 容器內看不到 key。SDK 仍要求 `TYPESAFE_API_KEY` 有值，所以隨便給一個佔位值即可：
 
 ```bash
-TYPESAFE_API_KEY=injected-by-proxy python run_benchmark.py --mode jev
+TYPESAFE_API_KEY=injected-by-proxy python run_benchmark.py --mode jev --shots 0 3
 ```
