@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/competitions/titanic",
   "baseline": {
     "model": "HistGradientBoosting + Title/FamilySize/HasCabin feature engineering",
-    "fit_seconds": 0.34,
+    "fit_seconds": 0.18,
     "full_test": {
       "n": 179,
       "accuracy": 0.8212290502793296,

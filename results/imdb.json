@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews",
   "baseline": {
     "model": "TF-IDF (1-2 gram) + Logistic Regression",
-    "fit_seconds": 34.21,
+    "fit_seconds": 26.73,
     "full_test": {
       "n": 10000,
       "accuracy": 0.918,
@@ -11,11 +11,11 @@
       "roc_auc": 0.9747282800000001
     },
     "jev_subset": {
-      "n": 200,
-      "accuracy": 0.91,
-      "macro_f1": 0.9099639855942376,
-      "f1_positive": 0.9117647058823529,
-      "roc_auc": 0.9787
+      "n": 10000,
+      "accuracy": 0.918,
+      "macro_f1": 0.9179985534944837,
+      "f1_positive": 0.9183429595698068,
+      "roc_auc": 0.9747282800000001
     }
   },
   "jev": {
@@ -23,26 +23,26 @@
     "shots": "0",
     "errors": 0,
     "jev_subset": {
-      "n": 200,
-      "accuracy": 0.95,
-      "macro_f1": 0.9499949994999499,
-      "f1_positive": 0.9504950495049505,
-      "roc_auc": 0.99055
+      "n": 10000,
+      "accuracy": 0.9627,
+      "macro_f1": 0.9626996863043618,
+      "f1_positive": 0.9628078572140791,
+      "roc_auc": 0.9933430599999999
     },
-    "latency_p50_s": 0.286,
-    "latency_p95_s": 0.439,
-    "input_tokens_total": 121414
+    "latency_p50_s": 0.294,
+    "latency_p95_s": 0.445,
+    "input_tokens_total": 6230983
   },
   "pipeline": {
     "problem": "Classify a movie review as positive or negative",
-    "n_jev_subset": 200,
+    "n_jev_subset": 10000,
     "n_full_test": 10000,
     "n_train": 40000,
     "question_type": "Noul",
     "question": "Is `review` a positive review overall, meaning the reviewer recommends the movie?",
     "answers": "yes / no",
     "state_example": {
-      "review": "Without reiterating what was said above about this movie, I would like to add that I was looking forward to watching this film...the cast/location and the work of the excellent director Michael Winterbottom etc...It had a vague shadow of 'Don't look Now' about the storyline from the beginning. A stay in different surroundings (Italy again) to dim the heartbreak of loss...or perhaps that's how I saw it? So consequently I sat there waiting for the story to unfold and put a spin on what we expect to happen to this family in a foreign European country....and I sat there and sat there....and guess what? nothing actually happens! and I mean nothing!! You are not even given the chance to get into the characters as they are so 1 dimensional and vacuous..You are led to believe from the pace of the movie that something was going to happen to turn the whole film on it's head...The eldest daughters flirtation with the local vespa boys, had great scope to take the movie in another direction, the youngest daughters visions of her dead mother ended up being a fruitless and pointless exercise, the fathers attempts at being seduced by one of his female students felt ridiculous given his age. It felt as if the script had a last recall made where they decided at the last minute to eradicated any guts to the story and went for paring it down to a bare minimum to no effect. When the credits started to roll (unexpectedly) you can't help but feel robbed of your time spent sat watching this pile of rubbish."
+      "review": "Yes, MTV there really is a way to market Daria. What started as a clever teenage angst-\"comment on everything that sucks and make the viewer feel better about their sucky teenage life\" sitcom now mutated into a \"how you should deal with your problems\"-charade. I used to watch Daria all the time and loved it. Now, sitting here after watching the so called \"movie\" I can only wonder what the point of this all was. Daria tells us how to lead out life in college? Excuse me? didn't the point Daria made every episode that what you like to do is ok, as long as it is ok with yourself no matter what the rest of the sick sad world thinks of it? This entire thing reminded me of the scene in \"Reality Bites\" the movie channel shows the documentry for the first time."
     },
     "state_example_label": "0"
   },
@@ -63,15 +63,15 @@
       25459
     ],
     "jev_subset": {
-      "n": 200,
-      "accuracy": 0.95,
-      "macro_f1": 0.9499949994999499,
-      "f1_positive": 0.9504950495049505,
-      "roc_auc": 0.9908
+      "n": 10000,
+      "accuracy": 0.9629,
+      "macro_f1": 0.9628998660685165,
+      "f1_positive": 0.9629703563229863,
+      "roc_auc": 0.99322994
     },
-    "latency_p50_s": 0.279,
-    "latency_p95_s": 0.378,
-    "input_tokens_total": 283814
+    "latency_p50_s": 0.294,
+    "latency_p95_s": 0.459,
+    "input_tokens_total": 14350983
   },
   "jev_cluster": {
     "model": "jev-latest",
@@ -135,15 +135,15 @@
       ]
     },
     "jev_subset": {
-      "n": 200,
-      "accuracy": 0.95,
-      "macro_f1": 0.9499949994999499,
-      "f1_positive": 0.9504950495049505,
-      "roc_auc": 0.99
+      "n": 10000,
+      "accuracy": 0.9625,
+      "macro_f1": 0.9624999156248102,
+      "f1_positive": 0.9625561657513729,
+      "roc_auc": 0.9932194200000001
     },
-    "latency_p50_s": 0.283,
-    "latency_p95_s": 0.427,
-    "input_tokens_total": 243614
+    "latency_p50_s": 0.292,
+    "latency_p95_s": 0.444,
+    "input_tokens_total": 12340983
   },
   "jev_cluster_random": {
     "model": "jev-latest",
@@ -160,14 +160,14 @@
       8357
     ],
     "jev_subset": {
-      "n": 200,
-      "accuracy": 0.95,
-      "macro_f1": 0.9499949994999499,
-      "f1_positive": 0.9504950495049505,
-      "roc_auc": 0.9904
+      "n": 10000,
+      "accuracy": 0.9633,
+      "macro_f1": 0.9632999174248142,
+      "f1_positive": 0.963354967548677,
+      "roc_auc": 0.99321792
     },
-    "latency_p50_s": 0.284,
-    "latency_p95_s": 0.371,
-    "input_tokens_total": 229814
+    "latency_p50_s": 0.3,
+    "latency_p95_s": 0.468,
+    "input_tokens_total": 11650983
   }
 }
