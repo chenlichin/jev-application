@@ -50,7 +50,20 @@ def jev_methods(all_results: dict[str, dict[str, Any]]) -> list[tuple[str, str]]
                        key=lambda k: 0 if k == "jev" else int(k[4:-4]))
     methods = [(k, "Jev 0-shot" if k == "jev" else f"Jev {k[4:-4]}-shot") for k in shot_keys]
     methods += [(key, label) for key, label in CLUSTER_VARIANTS.values() if key in present]
-    return methods + [(stack_key(v), stack_label(v)) for v in ("0", "cluster") if any(stack_key(v) in r for r in all_results.values())]
+    stacks = [(stack_key(v), stack_label(v)) for v in ("0", "cluster") if any(stack_key(v) in r for r in all_results.values())]
+    # The stage-2 control sits right before the stacked columns it is compared with.
+    control = [(STACK_CONTROL, "Stage 2 · Kaggle only")] if stacks else []
+    return methods + control + stacks
+
+
+STACK_CONTROL = "stack_control"
+
+
+def method_metrics(res: dict[str, Any], key: str) -> dict[str, Any]:
+    """Scores of one method; the stage-2 control is stored inside the 0-shot stacking result."""
+    if key == STACK_CONTROL:
+        return res.get("stack", {}).get("stage2_kaggle_only", {})
+    return res.get(key, {}).get("jev_subset", {})
 
 
 def stack_key(variant: str) -> str:
@@ -201,7 +214,8 @@ def _any_subset(all_results: dict[str, dict[str, Any]]) -> bool:
 def overview_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
     """Per task: dataset, size, problem, the Jev question, and the first state sent to Jev."""
     rows = [
-        _row(["Dataset", "n", "Train", "Problem", "Jev question", "State (first row)", "True label"]),
+        _row(["Dataset", "Subset n" if _any_subset(all_results) else "Full test n", "Train", "Problem", "Jev question",
+              "State (first row)", "True label"]),
         "| --- | ---: | ---: | --- | --- | --- | --- |",
     ]
     for name, res in all_results.items():
@@ -223,14 +237,15 @@ def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[st
     methods = jev_methods(all_results)
     # Once every task is scored on its whole test split, the full-test column would repeat "Kaggle".
     show_full = _any_subset(all_results)
-    header = ["Dataset", "n", "Kaggle", *(label for _, label in methods)] + (["Kaggle full test"] if show_full else [])
+    n_label = "Subset n" if show_full else "Full test n"
+    header = ["Dataset", n_label, "Kaggle", *(label for _, label in methods)] + (["Kaggle full test"] if show_full else [])
     rows = [_row(header), "| --- | " + " | ".join(["---:"] * (len(header) - 1)) + " |"]
     for name, res in all_results.items():
         p = res.get("pipeline")
         base = res.get("baseline", {}).get("jev_subset", {}).get(metric)
         if p is None or base is None:  # ROC AUC exists only for the binary tasks
             continue
-        scores = [base, *(res.get(key, {}).get("jev_subset", {}).get(metric) for key, _ in methods)]
+        scores = [base, *(method_metrics(res, key).get(metric) for key, _ in methods)]
         # Compared at the displayed precision, so scores that print the same are marked the same.
         best = max(round(v, 3) for v in scores if v is not None)
         cells = ["—" if v is None else f"**{_underline(f'{v:.3f}')}**" if round(v, 3) == best else f"{v:.3f}" for v in scores]
@@ -248,7 +263,7 @@ def write_summary() -> None:
         scope = ("`n` is the stratified test subset every method is scored on; \"Kaggle full test\" scores the same "
                  "Kaggle model on the whole 20% test split, to show whether the subset is representative.")
     else:
-        scope = "Every method is scored on the whole 20% test split (`n` rows), never seen in training."
+        scope = "Every method is scored on the whole 20% test split (`Full test n` rows), never seen in training."
     lines = [
         "# Kaggle × Jev benchmark results",
         "",
@@ -256,7 +271,9 @@ def write_summary() -> None:
         "Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;",
         "Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes",
         "one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.",
-        "Examples always come from the train split. Bold and underline mark the best score on the shared subset.",
+        "Kaggle + Jev columns stack the Kaggle model's out-of-fold score with Jev's probability in a logistic regression;",
+        "Stage 2 · Kaggle only is the same logistic regression without Jev, the control to compare them with.",
+        "Examples always come from the train split. Bold and underline mark the best score in each row.",
         "",
         "## 1. Summary",
         "",

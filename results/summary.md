@@ -1,14 +1,16 @@
 # Kaggle × Jev benchmark results
 
-Every method is scored on the whole 20% test split (`n` rows), never seen in training.
+Every method is scored on the whole 20% test split (`Full test n` rows), never seen in training.
 Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;
 Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes
 one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.
-Examples always come from the train split. Bold and underline mark the best score on the shared subset.
+Kaggle + Jev columns stack the Kaggle model's out-of-fold score with Jev's probability in a logistic regression;
+Stage 2 · Kaggle only is the same logistic regression without Jev, the control to compare them with.
+Examples always come from the train split. Bold and underline mark the best score in each row.
 
 ## 1. Summary
 
-| Dataset | n | Train | Problem | Jev question | State (first row) | True label |
+| Dataset | Full test n | Train | Problem | Jev question | State (first row) | True label |
 | --- | ---: | ---: | --- | --- | --- | --- |
 | [titanic](https://www.kaggle.com/competitions/titanic) | 179 | 712 | Predict whether a Titanic passenger survived | **Noul**: `passenger` describes a person aboard the RMS Titanic when it sank on 15 April 1912. Based on this profile and what is known about who reached the lifeboats, did this passenger survive? (yes / no) | `{"passenger": {"ticket_class": "3rd (lower)", "sex": "male", "title": "Mr", "age_years": 24.0, "siblings_or_sp …` | 0 |
 | [sms_spam](https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset) | 1115 | 4457 | Detect whether an SMS message is spam | **Noul**: Is `sms` a spam text message? (yes / no) | `{"sms": "No need to buy lunch for me.. I eat maggi mee.."}` | 0 |
@@ -18,33 +20,33 @@ Examples always come from the train split. Bold and underline mark the best scor
 
 ## 2. Accuracy
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0̲.̲8̲2̲1̲** | 0.648 | 0.682 | 0.754 | 0.682 | 0.793 | 0.799 |
-| sms_spam | 1115 | 0.985 | 0.979 | 0.980 | 0.980 | 0.981 | **0̲.̲9̲9̲2̲** | 0.991 |
-| imdb | 10000 | 0.918 | 0.963 | 0.963 | 0.963 | 0.963 | **0̲.̲9̲6̲4̲** | **0̲.̲9̲6̲4̲** |
-| bbc_news | 445 | 0.987 | 0.982 | 0.978 | 0.982 | 0.975 | 0.989 | **0̲.̲9̲9̲1̲** |
-| iris | 30 | 0.933 | 0.600 | 0.900 | 0.967 | 0.833 | 0.967 | **1̲.̲0̲0̲0̲** |
+| Dataset | Full test n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Stage 2 · Kaggle only | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | **0̲.̲8̲2̲1̲** | 0.648 | 0.682 | 0.754 | 0.682 | 0.810 | 0.793 | 0.799 |
+| sms_spam | 1115 | 0.985 | 0.979 | 0.980 | 0.980 | 0.981 | 0.985 | **0̲.̲9̲9̲2̲** | 0.991 |
+| imdb | 10000 | 0.918 | 0.963 | 0.963 | 0.963 | 0.963 | 0.918 | **0̲.̲9̲6̲4̲** | **0̲.̲9̲6̲4̲** |
+| bbc_news | 445 | 0.987 | 0.982 | 0.978 | 0.982 | 0.975 | 0.987 | 0.989 | **0̲.̲9̲9̲1̲** |
+| iris | 30 | 0.933 | 0.600 | 0.900 | 0.967 | 0.833 | 0.967 | 0.967 | **1̲.̲0̲0̲0̲** |
 
 ## 3. Macro-F1
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0̲.̲8̲1̲0̲** | 0.593 | 0.644 | 0.734 | 0.644 | 0.777 | 0.784 |
-| sms_spam | 1115 | 0.965 | 0.956 | 0.958 | 0.958 | 0.960 | **0̲.̲9̲8̲2̲** | 0.980 |
-| imdb | 10000 | 0.918 | 0.963 | 0.963 | 0.962 | 0.963 | **0̲.̲9̲6̲4̲** | **0̲.̲9̲6̲4̲** |
-| bbc_news | 445 | 0.986 | 0.982 | 0.978 | 0.982 | 0.975 | 0.989 | **0̲.̲9̲9̲1̲** |
-| iris | 30 | 0.933 | 0.494 | 0.898 | 0.967 | 0.828 | 0.967 | **1̲.̲0̲0̲0̲** |
+| Dataset | Full test n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Stage 2 · Kaggle only | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | **0̲.̲8̲1̲0̲** | 0.593 | 0.644 | 0.734 | 0.644 | 0.795 | 0.777 | 0.784 |
+| sms_spam | 1115 | 0.965 | 0.956 | 0.958 | 0.958 | 0.960 | 0.965 | **0̲.̲9̲8̲2̲** | 0.980 |
+| imdb | 10000 | 0.918 | 0.963 | 0.963 | 0.962 | 0.963 | 0.918 | **0̲.̲9̲6̲4̲** | **0̲.̲9̲6̲4̲** |
+| bbc_news | 445 | 0.986 | 0.982 | 0.978 | 0.982 | 0.975 | 0.986 | 0.989 | **0̲.̲9̲9̲1̲** |
+| iris | 30 | 0.933 | 0.494 | 0.898 | 0.967 | 0.828 | 0.967 | 0.967 | **1̲.̲0̲0̲0̲** |
 
 ## 4. ROC AUC (binary tasks)
 
 Uses the Kaggle model's positive-class score and Jev's `noul` probability.
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | 0.841 | 0.749 | 0.783 | 0.826 | 0.783 | 0.847 | **0̲.̲8̲5̲9̲** |
-| sms_spam | 1115 | 0.992 | 0.991 | 0.992 | 0.989 | 0.989 | **0̲.̲9̲9̲4̲** | 0.993 |
-| imdb | 10000 | 0.975 | 0.993 | 0.993 | 0.993 | 0.993 | **0̲.̲9̲9̲4̲** | **0̲.̲9̲9̲4̲** |
+| Dataset | Full test n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Stage 2 · Kaggle only | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | 0.841 | 0.749 | 0.783 | 0.826 | 0.783 | 0.841 | 0.847 | **0̲.̲8̲5̲9̲** |
+| sms_spam | 1115 | 0.992 | 0.991 | 0.992 | 0.989 | 0.989 | 0.992 | **0̲.̲9̲9̲4̲** | 0.993 |
+| imdb | 10000 | 0.975 | 0.993 | 0.993 | 0.993 | 0.993 | 0.975 | **0̲.̲9̲9̲4̲** | **0̲.̲9̲9̲4̲** |
 
 ## Run details
 
