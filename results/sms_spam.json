@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset",
   "baseline": {
     "model": "TF-IDF + Multinomial Naive Bayes",
-    "fit_seconds": 0.05,
+    "fit_seconds": 0.06,
     "full_test": {
       "n": 1115,
       "accuracy": 0.9847533632286996,
@@ -17,5 +17,19 @@
       "f1_positive": 0.92,
       "roc_auc": 0.9674587882680368
     }
+  },
+  "jev": {
+    "model": "jev-latest",
+    "errors": 0,
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.975,
+      "macro_f1": 0.9472990777338604,
+      "f1_positive": 0.9090909090909091,
+      "roc_auc": 0.9805180903446798
+    },
+    "latency_p50_s": 0.286,
+    "latency_p95_s": 0.46,
+    "input_tokens_total": 75034
   }
 }
