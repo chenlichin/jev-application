@@ -27,6 +27,7 @@ from jev_bench.datasets import ROOT, split
 from jev_bench.cluster_shots import select_cluster_shots, select_matched_random
 from jev_bench.few_shot import few_shot_questions, select_shots
 from jev_bench.jev_runner import request_payload, run_jev
+from jev_bench.stacking import run_stacking
 from jev_bench.tasks import TASKS, Task, positive_scores
 
 RESULTS_DIR = ROOT / "results"
@@ -48,7 +49,17 @@ def jev_methods(all_results: dict[str, dict[str, Any]]) -> list[tuple[str, str]]
     shot_keys = sorted((k for k in present if k == "jev" or k.endswith("shot") and k[4:-4].isdigit()),
                        key=lambda k: 0 if k == "jev" else int(k[4:-4]))
     methods = [(k, "Jev 0-shot" if k == "jev" else f"Jev {k[4:-4]}-shot") for k in shot_keys]
-    return methods + [(key, label) for key, label in CLUSTER_VARIANTS.values() if key in present]
+    methods += [(key, label) for key, label in CLUSTER_VARIANTS.values() if key in present]
+    return methods + [(stack_key(v), stack_label(v)) for v in ("0", "cluster") if any(stack_key(v) in r for r in all_results.values())]
+
+
+def stack_key(variant: str) -> str:
+    """Results key for Kaggle + Jev stacking with the given Jev shot variant."""
+    return "stack" if variant == "0" else f"stack_{jev_key(variant)[4:]}"
+
+
+def stack_label(variant: str) -> str:
+    return "Kaggle + Jev 0-shot" if variant == "0" else f"Kaggle + Jev {variant}"
 
 
 class ShotPlanner:
@@ -271,7 +282,7 @@ def write_summary() -> None:
     for name, res in all_results.items():
         for key, label in methods:
             if key in res:
-                details = {k: v for k, v in res[key].items() if k not in ("jev_subset", "shot_train_rows", "clustering")}
+                details = {k: v for k, v in res[key].items() if k not in ("jev_subset", "shot_train_rows", "clustering", "stage2_kaggle_only")}
                 lines.append(f"- **{name}** {label}: `{json.dumps(details, ensure_ascii=False)}`")
     (RESULTS_DIR / "summary.md").write_text("\n".join(lines) + "\n")
 
@@ -279,12 +290,16 @@ def write_summary() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--tasks", nargs="+", default=list(TASKS), choices=list(TASKS))
-    parser.add_argument("--mode", choices=["baseline", "jev", "both", "dry-run"], default="both")
-    parser.add_argument("--jev-n", type=int, default=200, help="test rows per task sent to Jev (stratified); 0 = all")
+    parser.add_argument("--mode", choices=["baseline", "jev", "both", "stack", "dry-run"], default="both")
+    parser.add_argument("--jev-n", type=int, default=0, help="test rows per task sent to Jev (stratified); 0 = all")
     parser.add_argument("--model", default="jev-latest")
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument(
         "--shots", nargs="+", default=["0"], help="shot variants: integers (examples per class), cluster, cluster-random"
+    )
+    parser.add_argument(
+        "--stack-shots", nargs="+", default=["0", "cluster"], choices=["0", "cluster"],
+        help="Jev variants whose probabilities are stacked with the Kaggle model (--mode stack)",
     )
     args = parser.parse_args()
     for variant in args.shots:
@@ -320,6 +335,18 @@ def main() -> None:
                 key = jev_key(variant)
                 res[key] = run_jev_eval(task, data, args.model, args.concurrency, variant, planner)
                 print(f"[{key}]", json.dumps(res[key].get("jev_subset"), ensure_ascii=False), "errors:", res[key]["errors"])
+        if args.mode == "stack":
+            for variant in args.stack_shots:
+                shot_rows, _ = planner.shots(variant)
+                info, preds = run_stacking(task, data, args.model, args.concurrency, shot_rows)
+                y = data.jev_test["label"]
+                res[stack_key(variant)] = {
+                    **info,
+                    # Control: stage 2 on the Kaggle score alone, to separate Jev's effect from re-fitting.
+                    "stage2_kaggle_only": metrics(task, y, *preds["kaggle_only"]),
+                    "jev_subset": metrics(task, y, *preds["stacked"]),
+                }
+                print(f"[{stack_key(variant)}]", json.dumps(res[stack_key(variant)], ensure_ascii=False))
         path.write_text(json.dumps(res, indent=2, ensure_ascii=False))
 
     if args.mode != "dry-run":
