@@ -18,33 +18,33 @@ Examples always come from the train split. Bold and underline mark the best scor
 
 ## 2. Accuracy
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0̲.̲8̲2̲1̲** | 0.648 | 0.682 | 0.754 | 0.682 |
-| sms_spam | 1115 | **0̲.̲9̲8̲5̲** | 0.979 | 0.980 | 0.980 | 0.981 |
-| imdb | 10000 | 0.918 | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** |
-| bbc_news | 445 | **0̲.̲9̲8̲7̲** | 0.982 | 0.978 | 0.982 | 0.975 |
-| iris | 30 | 0.933 | 0.600 | 0.900 | **0̲.̲9̲6̲7̲** | 0.833 |
+| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | **0̲.̲8̲2̲1̲** | 0.648 | 0.682 | 0.754 | 0.682 | 0.793 | 0.799 |
+| sms_spam | 1115 | **0̲.̲9̲8̲5̲** | 0.979 | 0.980 | 0.980 | 0.981 | — | — |
+| imdb | 10000 | 0.918 | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | — | — |
+| bbc_news | 445 | **0̲.̲9̲8̲7̲** | 0.982 | 0.978 | 0.982 | 0.975 | — | — |
+| iris | 30 | 0.933 | 0.600 | 0.900 | 0.967 | 0.833 | 0.967 | **1̲.̲0̲0̲0̲** |
 
 ## 3. Macro-F1
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0̲.̲8̲1̲0̲** | 0.593 | 0.644 | 0.734 | 0.644 |
-| sms_spam | 1115 | **0̲.̲9̲6̲5̲** | 0.956 | 0.958 | 0.958 | 0.960 |
-| imdb | 10000 | 0.918 | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | 0.962 | **0̲.̲9̲6̲3̲** |
-| bbc_news | 445 | **0̲.̲9̲8̲6̲** | 0.982 | 0.978 | 0.982 | 0.975 |
-| iris | 30 | 0.933 | 0.494 | 0.898 | **0̲.̲9̲6̲7̲** | 0.828 |
+| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | **0̲.̲8̲1̲0̲** | 0.593 | 0.644 | 0.734 | 0.644 | 0.777 | 0.784 |
+| sms_spam | 1115 | **0̲.̲9̲6̲5̲** | 0.956 | 0.958 | 0.958 | 0.960 | — | — |
+| imdb | 10000 | 0.918 | **0̲.̲9̲6̲3̲** | **0̲.̲9̲6̲3̲** | 0.962 | **0̲.̲9̲6̲3̲** | — | — |
+| bbc_news | 445 | **0̲.̲9̲8̲6̲** | 0.982 | 0.978 | 0.982 | 0.975 | — | — |
+| iris | 30 | 0.933 | 0.494 | 0.898 | 0.967 | 0.828 | 0.967 | **1̲.̲0̲0̲0̲** |
 
 ## 4. ROC AUC (binary tasks)
 
 Uses the Kaggle model's positive-class score and Jev's `noul` probability.
 
-| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0̲.̲8̲4̲1̲** | 0.749 | 0.783 | 0.826 | 0.783 |
-| sms_spam | 1115 | **0̲.̲9̲9̲2̲** | 0.991 | **0̲.̲9̲9̲2̲** | 0.989 | 0.989 |
-| imdb | 10000 | 0.975 | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** |
+| Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle + Jev 0-shot | Kaggle + Jev cluster |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| titanic | 179 | 0.841 | 0.749 | 0.783 | 0.826 | 0.783 | 0.847 | **0̲.̲8̲5̲9̲** |
+| sms_spam | 1115 | **0̲.̲9̲9̲2̲** | 0.991 | **0̲.̲9̲9̲2̲** | 0.989 | 0.989 | — | — |
+| imdb | 10000 | 0.975 | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** | **0̲.̲9̲9̲3̲** | — | — |
 
 ## Run details
 
@@ -52,6 +52,8 @@ Uses the Kaggle model's positive-class score and Jev's `noul` probability.
 - **titanic** Jev 3-shot: `{"model": "jev-latest", "shots": "3", "errors": 0, "examples_per_label": {"0": 3, "1": 3}, "latency_p50_s": 0.273, "latency_p95_s": 0.512, "input_tokens_total": 201955}`
 - **titanic** Jev cluster-shot: `{"model": "jev-latest", "shots": "cluster", "errors": 0, "examples_per_label": {"0": 3, "1": 3}, "latency_p50_s": 0.28, "latency_p95_s": 0.437, "input_tokens_total": 202492}`
 - **titanic** Jev matched random: `{"model": "jev-latest", "shots": "cluster-random", "errors": 0, "examples_per_label": {"0": 3, "1": 3}, "latency_p50_s": 0.273, "latency_p95_s": 0.512, "input_tokens_total": 201955}`
+- **titanic** Kaggle + Jev 0-shot: `{"stage2_train_rows": 712, "jev_missing": 0, "stage2_weight": {"kaggle": 1.946, "jev": 0.247}}`
+- **titanic** Kaggle + Jev cluster: `{"stage2_train_rows": 706, "jev_missing": 0, "stage2_weight": {"kaggle": 1.674, "jev": 0.56}}`
 - **sms_spam** Jev 0-shot: `{"model": "jev-latest", "shots": "0", "errors": 0, "latency_p50_s": 0.291, "latency_p95_s": 0.622, "input_tokens_total": 417218}`
 - **sms_spam** Jev 3-shot: `{"model": "jev-latest", "shots": "3", "errors": 0, "examples_per_label": {"0": 3, "1": 3}, "latency_p50_s": 0.286, "latency_p95_s": 0.508, "input_tokens_total": 833113}`
 - **sms_spam** Jev cluster-shot: `{"model": "jev-latest", "shots": "cluster", "errors": 0, "examples_per_label": {"0": 8, "1": 5}, "latency_p50_s": 0.292, "latency_p95_s": 0.541, "input_tokens_total": 988098}`
@@ -68,3 +70,5 @@ Uses the Kaggle model's positive-class score and Jev's `noul` probability.
 - **iris** Jev 3-shot: `{"model": "jev-latest", "shots": "3", "errors": 0, "examples_per_label": {"setosa": 3, "versicolor": 3, "virginica": 3}, "latency_p50_s": 0.281, "latency_p95_s": 0.581, "input_tokens_total": 27300, "accuracy_when_confidence_ge_0.8": 0.9565217391304348, "share_confidence_ge_0.8": 0.7666666666666667}`
 - **iris** Jev cluster-shot: `{"model": "jev-latest", "shots": "cluster", "errors": 0, "examples_per_label": {"setosa": 1, "versicolor": 2, "virginica": 2}, "latency_p50_s": 0.286, "latency_p95_s": 0.57, "input_tokens_total": 20940, "accuracy_when_confidence_ge_0.8": 1.0, "share_confidence_ge_0.8": 0.8}`
 - **iris** Jev matched random: `{"model": "jev-latest", "shots": "cluster-random", "errors": 0, "examples_per_label": {"setosa": 1, "versicolor": 2, "virginica": 2}, "latency_p50_s": 0.277, "latency_p95_s": 0.591, "input_tokens_total": 20940, "accuracy_when_confidence_ge_0.8": 0.9565217391304348, "share_confidence_ge_0.8": 0.7666666666666667}`
+- **iris** Kaggle + Jev 0-shot: `{"stage2_train_rows": 120, "jev_missing": 0}`
+- **iris** Kaggle + Jev cluster: `{"stage2_train_rows": 115, "jev_missing": 0}`

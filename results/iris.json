@@ -185,5 +185,33 @@
     "input_tokens_total": 20940,
     "accuracy_when_confidence_ge_0.8": 0.9565217391304348,
     "share_confidence_ge_0.8": 0.7666666666666667
+  },
+  "stack": {
+    "stage2_train_rows": 120,
+    "jev_missing": 0,
+    "stage2_kaggle_only": {
+      "n": 30,
+      "accuracy": 0.9666666666666667,
+      "macro_f1": 0.9665831244778612
+    },
+    "jev_subset": {
+      "n": 30,
+      "accuracy": 0.9666666666666667,
+      "macro_f1": 0.9665831244778612
+    }
+  },
+  "stack_cluster": {
+    "stage2_train_rows": 115,
+    "jev_missing": 0,
+    "stage2_kaggle_only": {
+      "n": 30,
+      "accuracy": 0.9666666666666667,
+      "macro_f1": 0.9665831244778612
+    },
+    "jev_subset": {
+      "n": 30,
+      "accuracy": 1.0,
+      "macro_f1": 1.0
+    }
   }
 }
