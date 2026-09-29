@@ -3,12 +3,12 @@
   "baseline": {
     "model": "StandardScaler + Logistic Regression",
     "fit_seconds": 0.01,
-    "full_test": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.9333333333333333,
       "macro_f1": 0.9333333333333332
     },
-    "jev_subset": {
+    "full_test_metrics": {
       "n": 30,
       "accuracy": 0.9333333333333333,
       "macro_f1": 0.9333333333333332
@@ -18,7 +18,7 @@
     "model": "jev-latest",
     "shots": "0",
     "errors": 0,
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.6,
       "macro_f1": 0.49350649350649345
@@ -31,7 +31,7 @@
   },
   "pipeline": {
     "problem": "Identify the iris species from 4 flower measurements",
-    "n_jev_subset": 30,
+    "n_scored": 30,
     "n_full_test": 30,
     "n_train": 120,
     "question_type": "Choice",
@@ -67,7 +67,7 @@
       46,
       43
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.9,
       "macro_f1": 0.8976982097186701
@@ -148,7 +148,7 @@
         }
       ]
     },
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.9666666666666667,
       "macro_f1": 0.9665831244778613
@@ -175,7 +175,7 @@
       57,
       46
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.8333333333333334,
       "macro_f1": 0.8283298826777088
@@ -189,12 +189,12 @@
   "stack": {
     "stage2_train_rows": 120,
     "jev_missing": 0,
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 30,
       "accuracy": 0.9666666666666667,
       "macro_f1": 0.9665831244778612
     },
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 0.9666666666666667,
       "macro_f1": 0.9665831244778612
@@ -203,12 +203,12 @@
   "stack_cluster": {
     "stage2_train_rows": 115,
     "jev_missing": 0,
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 30,
       "accuracy": 0.9666666666666667,
       "macro_f1": 0.9665831244778612
     },
-    "jev_subset": {
+    "metrics": {
       "n": 30,
       "accuracy": 1.0,
       "macro_f1": 1.0

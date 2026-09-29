@@ -2,15 +2,15 @@
   "kaggle": "https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset",
   "baseline": {
     "model": "TF-IDF + Multinomial Naive Bayes",
-    "fit_seconds": 0.05,
-    "full_test": {
+    "fit_seconds": 0.04,
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9847533632286996,
       "macro_f1": 0.9653896788023423,
       "f1_positive": 0.9395017793594306,
       "roc_auc": 0.9921908652576875
     },
-    "jev_subset": {
+    "full_test_metrics": {
       "n": 1115,
       "accuracy": 0.9847533632286996,
       "macro_f1": 0.9653896788023423,
@@ -22,7 +22,7 @@
     "model": "jev-latest",
     "shots": "0",
     "errors": 0,
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.979372197309417,
       "macro_f1": 0.9563210559931872,
@@ -35,7 +35,7 @@
   },
   "pipeline": {
     "problem": "Detect whether an SMS message is spam",
-    "n_jev_subset": 1115,
+    "n_scored": 1115,
     "n_full_test": 1115,
     "n_train": 4457,
     "question_type": "Noul",
@@ -62,7 +62,7 @@
       2245,
       4235
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9802690582959641,
       "macro_f1": 0.9581044706782533,
@@ -215,7 +215,7 @@
         }
       ]
     },
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9802690582959641,
       "macro_f1": 0.9581044706782533,
@@ -249,7 +249,7 @@
       596,
       1481
     ],
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9811659192825112,
       "macro_f1": 0.9596730442330645,
@@ -267,14 +267,14 @@
       "kaggle": 1.892,
       "jev": 3.073
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 1115,
       "accuracy": 0.9847533632286996,
       "macro_f1": 0.9653896788023423,
       "f1_positive": 0.9395017793594306,
       "roc_auc": 0.9921908652576875
     },
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9919282511210762,
       "macro_f1": 0.9823184580497268,
@@ -289,14 +289,14 @@
       "kaggle": 2.07,
       "jev": 3.189
     },
-    "stage2_kaggle_only": {
+    "control_metrics": {
       "n": 1115,
       "accuracy": 0.9865470852017937,
       "macro_f1": 0.9696461530922811,
       "f1_positive": 0.9469964664310954,
       "roc_auc": 0.9921908652576875
     },
-    "jev_subset": {
+    "metrics": {
       "n": 1115,
       "accuracy": 0.9910313901345291,
       "macro_f1": 0.9804105526508125,
