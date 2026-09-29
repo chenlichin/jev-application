@@ -204,7 +204,8 @@ def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[st
         scores = [base, *(res.get(key, {}).get("jev_subset", {}).get(metric) for key, _ in methods)]
         # Compared at the displayed precision, so scores that print the same are marked the same.
         best = max(round(v, 3) for v in scores if v is not None)
-        cells = ["—" if v is None else f"**{v:.3f}**" if round(v, 3) == best else f"{v:.3f}" for v in scores]
+        # Markdown has no underline, so the best score is also wrapped in <ins>, which GitHub underlines.
+        cells = ["—" if v is None else f"<ins>**{v:.3f}**</ins>" if round(v, 3) == best else f"{v:.3f}" for v in scores]
         full = res.get("baseline", {}).get("full_test", {}).get(metric)
         rows.append(_row([name, str(p["n_jev_subset"]), *cells, "—" if full is None else f"{full:.3f}"]))
     return rows
@@ -221,7 +222,7 @@ def write_summary() -> None:
         "Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;",
         "Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes",
         "one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.",
-        "Examples always come from the train split. Bold marks the best score on the shared subset.",
+        "Examples always come from the train split. Bold and underline mark the best score on the shared subset.",
         "",
         "## 1. Summary",
         "",

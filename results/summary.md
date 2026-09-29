@@ -4,7 +4,7 @@
 Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;
 Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes
 one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.
-Examples always come from the train split. Bold marks the best score on the shared subset.
+Examples always come from the train split. Bold and underline mark the best score on the shared subset.
 
 ## 1. Summary
 
@@ -20,21 +20,21 @@ Examples always come from the train split. Bold marks the best score on the shar
 
 | Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle full test |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0.821** | 0.648 | 0.682 | 0.754 | 0.682 | 0.821 |
-| sms_spam | 200 | **0.980** | 0.975 | 0.975 | 0.975 | 0.975 | 0.985 |
-| imdb | 200 | 0.910 | **0.950** | **0.950** | **0.950** | **0.950** | 0.918 |
-| bbc_news | 200 | **0.990** | 0.985 | 0.980 | 0.985 | 0.980 | 0.987 |
-| iris | 30 | 0.933 | 0.600 | 0.900 | **0.967** | 0.833 | 0.933 |
+| titanic | 179 | <ins>**0.821**</ins> | 0.648 | 0.682 | 0.754 | 0.682 | 0.821 |
+| sms_spam | 200 | <ins>**0.980**</ins> | 0.975 | 0.975 | 0.975 | 0.975 | 0.985 |
+| imdb | 200 | 0.910 | <ins>**0.950**</ins> | <ins>**0.950**</ins> | <ins>**0.950**</ins> | <ins>**0.950**</ins> | 0.918 |
+| bbc_news | 200 | <ins>**0.990**</ins> | 0.985 | 0.980 | 0.985 | 0.980 | 0.987 |
+| iris | 30 | 0.933 | 0.600 | 0.900 | <ins>**0.967**</ins> | 0.833 | 0.933 |
 
 ## 3. Macro-F1
 
 | Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle full test |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0.810** | 0.593 | 0.644 | 0.734 | 0.644 | 0.810 |
-| sms_spam | 200 | **0.954** | 0.947 | 0.947 | 0.947 | 0.947 | 0.965 |
-| imdb | 200 | 0.910 | **0.950** | **0.950** | **0.950** | **0.950** | 0.918 |
-| bbc_news | 200 | **0.990** | 0.985 | 0.980 | 0.985 | 0.980 | 0.986 |
-| iris | 30 | 0.933 | 0.494 | 0.898 | **0.967** | 0.828 | 0.933 |
+| titanic | 179 | <ins>**0.810**</ins> | 0.593 | 0.644 | 0.734 | 0.644 | 0.810 |
+| sms_spam | 200 | <ins>**0.954**</ins> | 0.947 | 0.947 | 0.947 | 0.947 | 0.965 |
+| imdb | 200 | 0.910 | <ins>**0.950**</ins> | <ins>**0.950**</ins> | <ins>**0.950**</ins> | <ins>**0.950**</ins> | 0.918 |
+| bbc_news | 200 | <ins>**0.990**</ins> | 0.985 | 0.980 | 0.985 | 0.980 | 0.986 |
+| iris | 30 | 0.933 | 0.494 | 0.898 | <ins>**0.967**</ins> | 0.828 | 0.933 |
 
 ## 4. ROC AUC (binary tasks)
 
@@ -42,9 +42,9 @@ Uses the Kaggle model's positive-class score and Jev's `noul` probability.
 
 | Dataset | n | Kaggle | Jev 0-shot | Jev 3-shot | Jev cluster-shot | Jev matched random | Kaggle full test |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| titanic | 179 | **0.841** | 0.749 | 0.783 | 0.826 | 0.783 | 0.841 |
-| sms_spam | 200 | 0.967 | 0.981 | **0.982** | 0.974 | 0.974 | 0.992 |
-| imdb | 200 | 0.979 | **0.991** | **0.991** | 0.990 | 0.990 | 0.975 |
+| titanic | 179 | <ins>**0.841**</ins> | 0.749 | 0.783 | 0.826 | 0.783 | 0.841 |
+| sms_spam | 200 | 0.967 | 0.981 | <ins>**0.982**</ins> | 0.974 | 0.974 | 0.992 |
+| imdb | 200 | 0.979 | <ins>**0.991**</ins> | <ins>**0.991**</ins> | 0.990 | 0.990 | 0.975 |
 
 ## Run details
 
