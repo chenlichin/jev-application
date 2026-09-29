@@ -17,8 +17,9 @@
 ## 實驗設計
 
 - **切分**：每個資料集做分層 80/20 切分（`random_state=42`）。baseline 只用 80% 訓練。
-- **Jev 測試子集**：從 20% 測試集中分層抽出最多 `--jev-n` 筆（預設 200；Titanic 179 筆、Iris 30 筆則全用），
-  baseline 與 Jev 都在**同一個子集**上評分，baseline 另外也報告完整測試集的分數。
+- **測試集**：下方結果中，所有方法都在**完整的 20% 測試集**上評分（`--jev-n 0`），
+  也就是和 Kaggle 模型考同一份、訓練時沒看過的考卷。
+  想省呼叫次數時可用 `--jev-n 200` 只抽分層子集，報告會多一欄 Kaggle 在完整測試集的分數，用來檢查子集是否有代表性。
 - **Jev 是零樣本**：Jev 看不到任何訓練標籤，只收到單筆資料的 `state` 和一個有型別的問題。
   - 二分類用 `Noul`，取 `noul ≥ 0.5` 為正類，並用 `noul` 機率算 ROC AUC。
   - 多分類用 `Choice`，取 `choice` 為預測，另外統計 `confidence ≥ 0.8` 時的準確率與覆蓋率。
@@ -65,7 +66,8 @@ python run_benchmark.py --mode baseline          # 只跑 Kaggle baseline，不�
 python run_benchmark.py --mode dry-run           # 輸出每題送給 Jev 的範例請求 results/*_request_example.json
 
 export TYPESAFE_API_KEY=...                       # 在 https://typesafe.ai 取得
-python run_benchmark.py --mode jev --jev-n 200   # 跑 Jev，結果合併進 results/ 並更新 summary.md
+python run_benchmark.py --mode jev --jev-n 0     # 跑 Jev（完整測試集），結果合併進 results/ 並更新 summary.md
+python run_benchmark.py --mode jev --jev-n 200   # 只抽 200 筆分層子集，省呼叫次數
 python run_benchmark.py --mode jev --shots 0 3   # 同時跑 0-shot 與每類 3 個例子的 3-shot
 python run_benchmark.py --mode jev --shots cluster cluster-random   # 分群挑例子 + 數量相同的隨機對照
 python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
@@ -74,44 +76,40 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 官方 Python SDK 是 [`typesafe-sdk`](https://pypi.org/project/typesafe-sdk/)（`import typesafe_sdk`），
 不是 `typesafe` 或 `typesafe-ai`（後兩者分別是無關套件與防搶註的轉址套件）。
 
-## 結果（model `jev-latest` = `jev-1.13.0`）
+## 結果（model `jev-latest` = `jev-1.13.0`，完整測試集）
 
 完整數字見 [`results/summary.md`](results/summary.md)（每次執行自動重建），分成四張表：
 **Summary**（資料集、筆數、要解決的問題、Jev 問題定義、第一筆送進 Jev 的 state）、**Accuracy**、**Macro-F1**、
-**ROC AUC**（僅二分類題）；每張指標表列出所有方法，並把同一子集上的最佳分數標成粗體加底線。
-所有方法在同一個測試子集上比較：
+**ROC AUC**（僅二分類題）；每張指標表列出所有方法，並把最佳分數標成粗體加底線。
 
-| 題目 | 筆數 | Accuracy · Kaggle | Accuracy · Jev 0-shot | Accuracy · Jev 3-shot | AUC · Kaggle | AUC · Jev 0-shot | AUC · Jev 3-shot | Tokens · 0-shot → 3-shot |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| IMDB 影評 | 200 | 0.910 | **0.950** | **0.950** | 0.979 | 0.991 | **0.991** | 121k → 284k（×2.3） |
-| SMS Spam | 200 | **0.980** | 0.975 | 0.975 | 0.967 | 0.981 | **0.982** | 75k → 150k（×2.0） |
-| BBC News | 200 | **0.990** | 0.985 | 0.980 | — | — | — | 181k → 633k（×3.5） |
-| Titanic | 179 | **0.821** | 0.648 | 0.682 | **0.841** | 0.749 | 0.783 | 80k → 202k（×2.5） |
-| Iris | 30 | **0.933** | 0.600 | 0.900 | — | — | — | 12k → 27k（×2.3） |
+所有方法都在完整 20% 測試集上評分（Kaggle 模型用 80% 訓練，Jev 例子也只從 80% 挑）：
 
-每次呼叫 p50 延遲約 0.29 秒、p95 約 0.36–0.73 秒，1,000 次呼叫 0 失敗。
+| 題目 | n | Accuracy · Kaggle | Accuracy · Jev 0-shot | Accuracy · Jev 3-shot | Accuracy · Jev cluster | Accuracy · 隨機對照 | AUC · Kaggle | AUC · Jev 0-shot |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| IMDB 影評 | 10,000 | 0.918 | **0.963** | **0.963** | **0.963** | **0.963** | 0.975 | **0.993** |
+| SMS Spam | 1,115 | **0.985** | 0.979 | 0.980 | 0.980 | 0.981 | **0.992** | 0.991 |
+| BBC News | 445 | **0.987** | 0.982 | 0.978 | 0.982 | 0.975 | — | — |
+| Titanic | 179 | **0.821** | 0.648 | 0.682 | 0.754 | 0.682 | **0.841** | 0.749 |
+| Iris | 30 | 0.933 | 0.600 | 0.900 | **0.967** | 0.833 | — | — |
+
+約 5 萬次呼叫：p50 延遲約 0.29 秒、p95 約 0.45–0.63 秒；2 次暫時失敗在重跑時自動補送成功，最終 0 失敗。
 
 ### 觀察
 
-- **文字題（IMDB、SMS、BBC）：Jev 零樣本就與用上千、上萬筆訓練資料的 Kaggle 解法打平甚至更好。**
-  IMDB 準確率高出 4 個百分點；SMS 的 AUC 更高；BBC 只差 1 筆。
-  BBC 中 93.5% 的答案信心 ≥ 0.8，這部分準確率 99.5%，信心可以拿來決定哪些要人工複查。
-- **Titanic：Jev 沒有抓到「婦孺優先」。** 女性平均生還機率只給 0.40（實際 0.74），男性 0.33（實際 0.20），
+- **IMDB：Jev 0-shot 在 10,000 筆上贏 Kaggle 4.5 個百分點（0.963 vs 0.918），AUC 0.993 vs 0.975。**
+  Kaggle 模型用了 40,000 筆訓練資料，Jev 一筆都沒用。這是整份報告最可信的結論（樣本數最大）。
+- **SMS、BBC：打平。** SMS 準確率差 0.6 個百分點、AUC 幾乎一樣（0.991 vs 0.992）；
+  BBC 在 445 篇中少對 2 篇。BBC 有 93.9% 的答案信心 ≥ 0.8，這部分準確率 99.3%，信心可用來決定哪些要人工複查。
+- **Titanic：Jev 沒有抓到「婦孺優先」。** 0-shot 時女性平均生還機率只給 0.40（實際 0.74），男性 0.33（實際 0.20），
   幾乎沒有區分性別；機率整體偏低，門檻 0.5 時只預測 25% 生還（實際 38%）。
-  AUC 0.75 表示排序有一定資訊，若門檻改為 0.4 準確率可到 0.73——但這個門檻是在測試集上看出來的，只能當診斷，不能當成績。
-- **Iris：Jev 從來沒有預測 virginica。** 10 朵 virginica 全被判為 versicolor，setosa 則全對。
-  純數值、需要從資料學邊界的問題不是 Jev 的用途；照 TypeSafe 的建議，這類規則應留在程式碼（或傳統模型）裡。
+- **Iris：0-shot 時 Jev 從來沒有預測 virginica**（10 朵全被判為 versicolor）。
+  純數值、需要從資料學邊界的問題不是 Jev 的強項。
 
-### Few-shot 的效果（每類 3 個例子）
+### Few-shot 的效果
 
-- **Iris 大幅改善：0.60 → 0.90。** 0-shot 時 Jev 不知道三個品種的尺寸分界、從不預測 virginica；
-  看了 9 朵有標籤的花之後，已接近 Kaggle 模型的 0.933（30 筆中只差 1 朵）。
-- **Titanic 小幅改善：accuracy 0.648 → 0.682、AUC 0.749 → 0.783。** 例子讓性別差距拉開一些
-  （女性平均生還機率 0.40 → 0.46、男性 0.33 → 0.30），但 6 個例子仍不足以學到「婦孺優先」的強度，離 0.821 還遠。
-- **文字題幾乎不變**：IMDB、SMS 持平（AUC 微升），BBC 少對 1 筆（200 筆內的差異，屬於雜訊範圍）。
-  0-shot 已經很好，例子帶來的資訊有限，token 成本卻變成 2–3.5 倍。
-
-**建議**：文字題用 0-shot 就好；數值／表格題 few-shot 有明顯幫助，是值得付的 token 成本。
+- **文字題：例子沒有幫助。** 在完整測試集上 IMDB 四種 Jev 方法都是 0.963、SMS 在 0.979–0.981 之間，
+  BBC 3-shot 反而少對 2 篇；token 成本卻是 0-shot 的 2–3.5 倍（IMDB：620 萬 → 1,435 萬 token）。
+- **表格／數值題：例子有明顯幫助**，Iris 0.60 → 0.90、Titanic 0.648 → 0.682（每類 3 個隨機例子）。
 
 ### Cluster few-shot：用分群挑「邊緣 pattern」
 
@@ -119,27 +117,26 @@ python run_benchmark.py --mode both --tasks sms_spam imdb --concurrency 16
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
 | Titanic | 3 | 3 / 3 | 0.648 | 0.682 | **0.754** | 0.682 | 0.821 |
 | Iris | 3 | 1 / 2 / 2 | 0.600 | 0.900 | **0.967** | 0.833 | 0.933 |
-| BBC News | 8 | 3 / 4 / 2 / 3 / 3 | 0.985 | 0.980 | 0.985 | 0.980 | 0.990 |
-| SMS Spam | 8 | 8 / 5 | 0.975 | 0.975 | 0.975 | 0.975 | 0.980 |
-| IMDB | 2 | 2 / 2 | 0.950 | 0.950 | 0.950 | 0.950 | 0.910 |
+| BBC News | 8 | 3 / 4 / 2 / 3 / 3 | 0.982 | 0.978 | 0.982 | 0.975 | 0.987 |
+| SMS Spam | 8 | 8 / 5 | 0.979 | 0.980 | 0.980 | 0.981 | 0.985 |
+| IMDB | 2 | 2 / 2 | 0.963 | 0.963 | 0.963 | 0.963 | 0.918 |
 
 - **Titanic：0.682 → 0.754，AUC 0.783 → 0.826。** 例子數完全相同（每類 3 個、token 幾乎一樣），
   唯一差別是挑法：分群挑到了「生還者中的少數群」（生還者只佔該群 25%）與「死者中的少數群」（死者只佔該群 30%）。
   隨機對照組剛好與 3-shot 抽到同一組例子（同數量、同 seed），所以兩者分數相同；179 筆中 cluster 多對 13 筆。
-- **Iris：0.900 → 0.967，比 Kaggle 的 0.933 還高 1 朵。** 只用 5 個例子（3-shot 用 9 個）就更好；
-  同數量的隨機對照只有 0.833，所以提升來自多樣性而不是例子數。
-  分群挑到的是 5 朵「長得像 virginica 的 versicolor」與 14 朵「長得像 versicolor 的 virginica」這兩個混淆區的代表。
-  注意 Iris 只有 30 筆，差 1 朵就是 3.3 個百分點。
-- **文字題沒有差別。** 0-shot 已接近上限；此外高維文字的 silhouette 只有 0.02–0.08，分群本身就不太明確
+- **Iris：0.900 → 0.967。** 只用 5 個例子（3-shot 用 9 個）就更好；同數量的隨機對照只有 0.833，
+  所以提升來自多樣性而不是例子數。分群挑到的是 5 朵「長得像 virginica 的 versicolor」
+  與 14 朵「長得像 versicolor 的 virginica」這兩個混淆區的代表。
+  Iris 只有 30 筆，0.967 vs Kaggle 0.933 只差 1 朵，不能說贏過 Kaggle。
+- **文字題沒有差別。** 高維文字的 silhouette 只有 0.02–0.08，分群本身就不太明確
   （IMDB 只分出 2 群，SMS／BBC 都頂到上限 8 群）。
-
-**結論**：在表格／數值題，「用分群挑邊緣例子」比隨機挑同樣數量的例子明顯更好，是這次實驗最有效的改進；
-文字題則不需要。
 
 ### 結論
 
-Jev 適合取代「需要理解語意」的文字分類模型，而且不需要訓練資料；
-表格／數值題靠 few-shot 可以縮小差距（Iris 幾乎追平），但目前仍以傳統模型為佳，或把 Jev 的判斷當成額外特徵交給傳統模型。
+- **文字分類：直接用 Jev 0-shot。** IMDB 明顯勝過 Kaggle 解法，SMS、BBC 打平，而且完全不需要訓練資料；
+  加例子只會增加成本。
+- **表格／數值題：Kaggle 傳統模型仍然較好。** 若要用 Jev，務必加例子，而且用「分群挑邊緣例子」比隨機挑更好；
+  或把 Jev 的判斷當成額外特徵交給傳統模型。
 
 ### 下一步可以試
 
