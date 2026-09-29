@@ -2,69 +2,17 @@
 
 ## Pipeline overview
 
-`n` is the stratified test subset both methods are scored on. Kaggle columns are the classic
-Kaggle solution trained on the 80% train split; Jev is zero-shot and never sees training labels.
+`n` is the stratified test subset both methods are scored on; "Kaggle full test" is the whole 20% test split.
+Kaggle columns are the classic Kaggle solution trained on the 80% train split; Jev is zero-shot and never
+sees training labels. Row counts for every split are in `results/<task>.json` under `pipeline`.
 
-<table>
-<thead>
-<tr>
-<th rowspan="2">Dataset</th><th rowspan="2">n</th><th rowspan="2">Problem</th>
-<th rowspan="2">Jev question</th><th rowspan="2">State (first row)</th>
-<th colspan="3">Accuracy</th><th colspan="2">Macro-F1</th>
-</tr>
-<tr>
-<th>Kaggle</th><th>Jev zero-shot</th><th>Kaggle full test</th>
-<th>Kaggle</th><th>Jev zero-shot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://www.kaggle.com/competitions/titanic">titanic</a></td>
-<td>179<br><sub>full test 179<br>train 712</sub></td>
-<td>Predict whether a Titanic passenger survived</td>
-<td><b>Noul</b>: <code>passenger</code> describes a person aboard the RMS Titanic when it sank on 15 April 1912. Based on this profile and what is known about who reached the lifeboats, did this passenger survive?<br><sub>answers: yes / no</sub></td>
-<td><code>{&quot;passenger&quot;: {&quot;ticket_class&quot;: &quot;3rd (lower)&quot;, &quot;sex&quot;: &quot;male&quot;, &quot;title&quot;: &quot;Mr&quot;, &quot;age_years&quot;: 24.0, &quot;siblings_or_spouses_aboard&quot;: 2, &quot;parents_or_children_aboard&quot;: 0, …</code><br><sub>true label: 0</sub></td>
-<td>0.821</td><td>0.648</td><td>0.821</td>
-<td>0.810</td><td>0.593</td>
-</tr>
-<tr>
-<td><a href="https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset">sms_spam</a></td>
-<td>200<br><sub>full test 1115<br>train 4457</sub></td>
-<td>Detect whether an SMS message is spam</td>
-<td><b>Noul</b>: Is <code>sms</code> a spam text message?<br><sub>answers: yes / no</sub></td>
-<td><code>{&quot;sms&quot;: &quot;Aight I&#x27;ll grab something to eat too, text me when you&#x27;re back at mu&quot;}</code><br><sub>true label: 0</sub></td>
-<td>0.980</td><td>0.975</td><td>0.985</td>
-<td>0.954</td><td>0.947</td>
-</tr>
-<tr>
-<td><a href="https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews">imdb</a></td>
-<td>200<br><sub>full test 10000<br>train 40000</sub></td>
-<td>Classify a movie review as positive or negative</td>
-<td><b>Noul</b>: Is <code>review</code> a positive review overall, meaning the reviewer recommends the movie?<br><sub>answers: yes / no</sub></td>
-<td><code>{&quot;review&quot;: &quot;Without reiterating what was said above about this movie, I would like to add that I was looking forward to watching this film...the cast/location a …</code><br><sub>true label: 0</sub></td>
-<td>0.910</td><td>0.950</td><td>0.918</td>
-<td>0.910</td><td>0.950</td>
-</tr>
-<tr>
-<td><a href="https://www.kaggle.com/competitions/learn-ai-bbc">bbc_news</a></td>
-<td>200<br><sub>full test 445<br>train 1780</sub></td>
-<td>Assign a BBC News article to one of 5 sections</td>
-<td><b>Choice</b>: Which BBC News section does <code>article</code> belong to?<br><sub>answers: business / entertainment / politics / sport / tech</sub></td>
-<td><code>{&quot;article&quot;: &quot;ministers  naive  over phone-taps the government is being naive by refusing to allow phone-tap evidence in court  a senior eu politician says.  jav …</code><br><sub>true label: politics</sub></td>
-<td>0.990</td><td>0.985</td><td>0.987</td>
-<td>0.990</td><td>0.985</td>
-</tr>
-<tr>
-<td><a href="https://www.kaggle.com/datasets/uciml/iris">iris</a></td>
-<td>30<br><sub>full test 30<br>train 120</sub></td>
-<td>Identify the iris species from 4 flower measurements</td>
-<td><b>Choice</b>: <code>flower_measurements_cm</code> are measurements of one iris flower. Which species is it?<br><sub>answers: setosa / versicolor / virginica</sub></td>
-<td><code>{&quot;flower_measurements_cm&quot;: {&quot;sepal_length&quot;: 4.4, &quot;sepal_width&quot;: 3.0, &quot;petal_length&quot;: 1.3, &quot;petal_width&quot;: 0.2}}</code><br><sub>true label: setosa</sub></td>
-<td>0.933</td><td>0.600</td><td>0.933</td>
-<td>0.933</td><td>0.494</td>
-</tr>
-</tbody>
-</table>
+| Dataset | n | Problem | Jev question | State (first row) | True label | Accuracy · Kaggle | Accuracy · Jev | Accuracy · Kaggle full test | Macro-F1 · Kaggle | Macro-F1 · Jev |
+| --- | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| [titanic](https://www.kaggle.com/competitions/titanic) | 179 | Predict whether a Titanic passenger survived | **Noul**: `passenger` describes a person aboard the RMS Titanic when it sank on 15 April 1912. Based on this profile and what is known about who reached the lifeboats, did this passenger survive? (yes / no) | `{"passenger": {"ticket_class": "3rd (lower)", "sex": "male", "title": "Mr", "age_years": 24.0, "siblings_or_sp …` | 0 | 0.821 | 0.648 | 0.821 | 0.810 | 0.593 |
+| [sms_spam](https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset) | 200 | Detect whether an SMS message is spam | **Noul**: Is `sms` a spam text message? (yes / no) | `{"sms": "Aight I'll grab something to eat too, text me when you're back at mu"}` | 0 | 0.980 | 0.975 | 0.985 | 0.954 | 0.947 |
+| [imdb](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews) | 200 | Classify a movie review as positive or negative | **Noul**: Is `review` a positive review overall, meaning the reviewer recommends the movie? (yes / no) | `{"review": "Without reiterating what was said above about this movie, I would like to add that I was looking f …` | 0 | 0.910 | 0.950 | 0.918 | 0.910 | 0.950 |
+| [bbc_news](https://www.kaggle.com/competitions/learn-ai-bbc) | 200 | Assign a BBC News article to one of 5 sections | **Choice**: Which BBC News section does `article` belong to? (business / entertainment / politics / sport / tech) | `{"article": "ministers naive over phone-taps the government is being naive by refusing to allow phone-tap ev …` | politics | 0.990 | 0.985 | 0.987 | 0.990 | 0.985 |
+| [iris](https://www.kaggle.com/datasets/uciml/iris) | 30 | Identify the iris species from 4 flower measurements | **Choice**: `flower_measurements_cm` are measurements of one iris flower. Which species is it? (setosa / versicolor / virginica) | `{"flower_measurements_cm": {"sepal_length": 4.4, "sepal_width": 3.0, "petal_length": 1.3, "petal_width": 0.2}}` | setosa | 0.933 | 0.600 | 0.933 | 0.933 | 0.494 |
 
 ## All metrics
 

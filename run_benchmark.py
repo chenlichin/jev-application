@@ -10,9 +10,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import html
 import json
-import re
 import time
 from typing import Any
 
@@ -107,23 +105,19 @@ def _truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[:limit].rstrip() + " …"
 
 
+def _cell(text: str) -> str:
+    """Make text safe inside one Markdown table cell."""
+    return " ".join(text.split()).replace("|", "\\|")
+
+
 def pipeline_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
-    """HTML table (GitHub renders it) with metric columns grouped under shared headers."""
+    """Plain Markdown table; each metric column is prefixed with its group ("Accuracy · Kaggle")."""
     fmt = lambda v: "—" if v is None else f"{v:.3f}"
     rows = [
-        "<table>",
-        "<thead>",
-        "<tr>",
-        '<th rowspan="2">Dataset</th><th rowspan="2">n</th><th rowspan="2">Problem</th>',
-        '<th rowspan="2">Jev question</th><th rowspan="2">State (first row)</th>',
-        '<th colspan="3">Accuracy</th><th colspan="2">Macro-F1</th>',
-        "</tr>",
-        "<tr>",
-        "<th>Kaggle</th><th>Jev zero-shot</th><th>Kaggle full test</th>",
-        "<th>Kaggle</th><th>Jev zero-shot</th>",
-        "</tr>",
-        "</thead>",
-        "<tbody>",
+        "| Dataset | n | Problem | Jev question | State (first row) | True label "
+        "| Accuracy · Kaggle | Accuracy · Jev | Accuracy · Kaggle full test "
+        "| Macro-F1 · Kaggle | Macro-F1 · Jev |",
+        "| --- | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for name, res in all_results.items():
         p = res.get("pipeline")
@@ -131,21 +125,23 @@ def pipeline_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
             continue
         base, full = res.get("baseline", {}).get("jev_subset", {}), res.get("baseline", {}).get("full_test", {})
         jev = res.get("jev", {}).get("jev_subset", {})
-        state = html.escape(_truncate(json.dumps(p["state_example"], ensure_ascii=False), 160))
-        # Markdown is not rendered inside an HTML block, so `state` paths become <code> explicitly.
-        question = re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(p["question"]))
-        rows += [
-            "<tr>",
-            f'<td><a href="{res["kaggle"]}">{name}</a></td>',
-            f'<td>{p["n_jev_subset"]}<br><sub>full test {p["n_full_test"]}<br>train {p["n_train"]}</sub></td>',
-            f"<td>{html.escape(p['problem'])}</td>",
-            f"<td><b>{p['question_type']}</b>: {question}<br><sub>answers: {html.escape(p['answers'])}</sub></td>",
-            f"<td><code>{state}</code><br><sub>true label: {html.escape(p['state_example_label'])}</sub></td>",
-            f"<td>{fmt(base.get('accuracy'))}</td><td>{fmt(jev.get('accuracy'))}</td><td>{fmt(full.get('accuracy'))}</td>",
-            f"<td>{fmt(base.get('macro_f1'))}</td><td>{fmt(jev.get('macro_f1'))}</td>",
-            "</tr>",
+        # Backticks would end the code span early, so they are dropped from the example state.
+        state = _truncate(json.dumps(p["state_example"], ensure_ascii=False).replace("`", ""), 110)
+        question = f"**{p['question_type']}**: {p['question']} ({p['answers']})"
+        cells = [
+            f"[{name}]({res['kaggle']})",
+            str(p["n_jev_subset"]),
+            p["problem"],
+            question,
+            f"`{state}`",
+            p["state_example_label"],
+            fmt(base.get("accuracy")),
+            fmt(jev.get("accuracy")),
+            fmt(full.get("accuracy")),
+            fmt(base.get("macro_f1")),
+            fmt(jev.get("macro_f1")),
         ]
-    rows += ["</tbody>", "</table>"]
+        rows.append("| " + " | ".join(_cell(c) for c in cells) + " |")
     return rows
 
 
@@ -157,8 +153,9 @@ def write_summary() -> None:
         "",
         "## Pipeline overview",
         "",
-        "`n` is the stratified test subset both methods are scored on. Kaggle columns are the classic",
-        "Kaggle solution trained on the 80% train split; Jev is zero-shot and never sees training labels.",
+        "`n` is the stratified test subset both methods are scored on; \"Kaggle full test\" is the whole 20% test split.",
+        "Kaggle columns are the classic Kaggle solution trained on the 80% train split; Jev is zero-shot and never",
+        "sees training labels. Row counts for every split are in `results/<task>.json` under `pipeline`.",
         "",
         *pipeline_table(all_results),
         "",
