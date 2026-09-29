@@ -180,6 +180,13 @@ def _row(cells: list[str]) -> str:
     return "| " + " | ".join(_cell(c) for c in cells) + " |"
 
 
+def _any_subset(all_results: dict[str, dict[str, Any]]) -> bool:
+    """Whether any task was scored on a sample of its test split rather than all of it."""
+    return any(
+        (p := res.get("pipeline")) is not None and p["n_jev_subset"] < p["n_full_test"] for res in all_results.values()
+    )
+
+
 def overview_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
     """Per task: dataset, size, problem, the Jev question, and the first state sent to Jev."""
     rows = [
@@ -203,7 +210,9 @@ def overview_table(all_results: dict[str, dict[str, Any]]) -> list[str]:
 def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[str]:
     """One metric across every method; the best score on the shared subset is bold."""
     methods = jev_methods(all_results)
-    header = ["Dataset", "n", "Kaggle", *(label for _, label in methods), "Kaggle full test"]
+    # Once every task is scored on its whole test split, the full-test column would repeat "Kaggle".
+    show_full = _any_subset(all_results)
+    header = ["Dataset", "n", "Kaggle", *(label for _, label in methods)] + (["Kaggle full test"] if show_full else [])
     rows = [_row(header), "| --- | " + " | ".join(["---:"] * (len(header) - 1)) + " |"]
     for name, res in all_results.items():
         p = res.get("pipeline")
@@ -215,7 +224,8 @@ def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[st
         best = max(round(v, 3) for v in scores if v is not None)
         cells = ["—" if v is None else f"**{_underline(f'{v:.3f}')}**" if round(v, 3) == best else f"{v:.3f}" for v in scores]
         full = res.get("baseline", {}).get("full_test", {}).get(metric)
-        rows.append(_row([name, str(p["n_jev_subset"]), *cells, "—" if full is None else f"{full:.3f}"]))
+        extra = ["—" if full is None else f"{full:.3f}"] if show_full else []
+        rows.append(_row([name, str(p["n_jev_subset"]), *cells, *extra]))
     return rows
 
 
@@ -223,10 +233,15 @@ def write_summary() -> None:
     """Summarise every task that has a results file, not only the tasks run this time."""
     all_results = {name: json.loads(p.read_text()) for name in TASKS if (p := RESULTS_DIR / f"{name}.json").exists()}
     methods = jev_methods(all_results)
+    if _any_subset(all_results):
+        scope = ("`n` is the stratified test subset every method is scored on; \"Kaggle full test\" scores the same "
+                 "Kaggle model on the whole 20% test split, to show whether the subset is representative.")
+    else:
+        scope = "Every method is scored on the whole 20% test split (`n` rows), never seen in training."
     lines = [
         "# Kaggle × Jev benchmark results",
         "",
-        "`n` is the stratified test subset every method is scored on; \"Kaggle full test\" is the whole 20% test split.",
+        scope,
         "Kaggle is the classic Kaggle solution trained on the 80% train split. Jev 0-shot never sees training labels;",
         "Jev k-shot adds k random labeled training examples per class to each answer's criteria; Jev cluster-shot takes",
         "one example per (label, k-means cluster) cell; Jev matched random is its control with the same per-label counts.",
