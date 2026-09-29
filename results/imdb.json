@@ -169,5 +169,49 @@
     "latency_p50_s": 0.3,
     "latency_p95_s": 0.468,
     "input_tokens_total": 11650983
+  },
+  "stack": {
+    "stage2_train_rows": 2000,
+    "jev_missing": 0,
+    "stage2_weight": {
+      "kaggle": 1.172,
+      "jev": 4.198
+    },
+    "stage2_kaggle_only": {
+      "n": 10000,
+      "accuracy": 0.9183,
+      "macro_f1": 0.9182967571982932,
+      "f1_positive": 0.918811487627944,
+      "roc_auc": 0.9747282800000001
+    },
+    "jev_subset": {
+      "n": 10000,
+      "accuracy": 0.9644,
+      "macro_f1": 0.9643987183538607,
+      "f1_positive": 0.9646123260437376,
+      "roc_auc": 0.99446072
+    }
+  },
+  "stack_cluster": {
+    "stage2_train_rows": 2000,
+    "jev_missing": 0,
+    "stage2_weight": {
+      "kaggle": 0.942,
+      "jev": 4.108
+    },
+    "stage2_kaggle_only": {
+      "n": 10000,
+      "accuracy": 0.9182,
+      "macro_f1": 0.9181970550939833,
+      "f1_positive": 0.9186878727634195,
+      "roc_auc": 0.9747282800000001
+    },
+    "jev_subset": {
+      "n": 10000,
+      "accuracy": 0.964,
+      "macro_f1": 0.9639989502093881,
+      "f1_positive": 0.9641933558782574,
+      "roc_auc": 0.9942849600000001
+    }
   }
 }
