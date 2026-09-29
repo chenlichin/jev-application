@@ -16,7 +16,7 @@
   },
   "jev": {
     "model": "jev-latest",
-    "shots_per_class": 0,
+    "shots": "0",
     "errors": 0,
     "jev_subset": {
       "n": 200,
@@ -44,8 +44,15 @@
   },
   "jev_3shot": {
     "model": "jev-latest",
-    "shots_per_class": 3,
+    "shots": "3",
     "errors": 0,
+    "examples_per_label": {
+      "business": 3,
+      "entertainment": 3,
+      "politics": 3,
+      "sport": 3,
+      "tech": 3
+    },
     "shot_train_rows": [
       308,
       920,
@@ -71,6 +78,216 @@
     "latency_p50_s": 0.282,
     "latency_p95_s": 0.405,
     "input_tokens_total": 632842,
+    "accuracy_when_confidence_ge_0.8": 0.9946236559139785,
+    "share_confidence_ge_0.8": 0.93
+  },
+  "jev_cluster": {
+    "model": "jev-latest",
+    "shots": "cluster",
+    "errors": 0,
+    "examples_per_label": {
+      "business": 3,
+      "entertainment": 4,
+      "politics": 2,
+      "sport": 3,
+      "tech": 3
+    },
+    "shot_train_rows": [
+      873,
+      618,
+      866,
+      885,
+      937,
+      1032,
+      699,
+      108,
+      302,
+      147,
+      1276,
+      931,
+      467,
+      1251,
+      500
+    ],
+    "clustering": {
+      "k": 8,
+      "silhouette": {
+        "5": 0.0713,
+        "6": 0.0724,
+        "7": 0.0779,
+        "8": 0.0816
+      },
+      "min_cell_size": 3,
+      "cells": [
+        {
+          "label": "business",
+          "cluster": 2,
+          "cell_size": 14,
+          "cluster_size": 345,
+          "label_share_of_cluster": 0.041,
+          "train_row": 873
+        },
+        {
+          "label": "business",
+          "cluster": 4,
+          "cell_size": 12,
+          "cluster_size": 331,
+          "label_share_of_cluster": 0.036,
+          "train_row": 618
+        },
+        {
+          "label": "business",
+          "cluster": 5,
+          "cell_size": 381,
+          "cluster_size": 391,
+          "label_share_of_cluster": 0.974,
+          "train_row": 866
+        },
+        {
+          "label": "entertainment",
+          "cluster": 0,
+          "cell_size": 102,
+          "cluster_size": 103,
+          "label_share_of_cluster": 0.99,
+          "train_row": 885
+        },
+        {
+          "label": "entertainment",
+          "cluster": 1,
+          "cell_size": 195,
+          "cluster_size": 199,
+          "label_share_of_cluster": 0.98,
+          "train_row": 937
+        },
+        {
+          "label": "entertainment",
+          "cluster": 2,
+          "cell_size": 4,
+          "cluster_size": 345,
+          "label_share_of_cluster": 0.012,
+          "train_row": 1032
+        },
+        {
+          "label": "entertainment",
+          "cluster": 4,
+          "cell_size": 7,
+          "cluster_size": 331,
+          "label_share_of_cluster": 0.021,
+          "train_row": 699
+        },
+        {
+          "label": "politics",
+          "cluster": 2,
+          "cell_size": 326,
+          "cluster_size": 345,
+          "label_share_of_cluster": 0.945,
+          "train_row": 108
+        },
+        {
+          "label": "politics",
+          "cluster": 5,
+          "cell_size": 5,
+          "cluster_size": 391,
+          "label_share_of_cluster": 0.013,
+          "train_row": 302
+        },
+        {
+          "label": "sport",
+          "cluster": 3,
+          "cell_size": 113,
+          "cluster_size": 113,
+          "label_share_of_cluster": 1.0,
+          "train_row": 147
+        },
+        {
+          "label": "sport",
+          "cluster": 6,
+          "cell_size": 147,
+          "cluster_size": 147,
+          "label_share_of_cluster": 1.0,
+          "train_row": 1276
+        },
+        {
+          "label": "sport",
+          "cluster": 7,
+          "cell_size": 149,
+          "cluster_size": 151,
+          "label_share_of_cluster": 0.987,
+          "train_row": 931
+        },
+        {
+          "label": "tech",
+          "cluster": 1,
+          "cell_size": 4,
+          "cluster_size": 199,
+          "label_share_of_cluster": 0.02,
+          "train_row": 467
+        },
+        {
+          "label": "tech",
+          "cluster": 4,
+          "cell_size": 310,
+          "cluster_size": 331,
+          "label_share_of_cluster": 0.937,
+          "train_row": 1251
+        },
+        {
+          "label": "tech",
+          "cluster": 5,
+          "cell_size": 4,
+          "cluster_size": 391,
+          "label_share_of_cluster": 0.01,
+          "train_row": 500
+        }
+      ]
+    },
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.985,
+      "macro_f1": 0.9851195174788799
+    },
+    "latency_p50_s": 0.291,
+    "latency_p95_s": 0.38,
+    "input_tokens_total": 615042,
+    "accuracy_when_confidence_ge_0.8": 0.9946808510638298,
+    "share_confidence_ge_0.8": 0.94
+  },
+  "jev_cluster_random": {
+    "model": "jev-latest",
+    "shots": "cluster-random",
+    "errors": 0,
+    "examples_per_label": {
+      "business": 3,
+      "entertainment": 4,
+      "politics": 2,
+      "sport": 3,
+      "tech": 3
+    },
+    "shot_train_rows": [
+      308,
+      920,
+      1127,
+      1695,
+      65,
+      351,
+      364,
+      163,
+      1634,
+      704,
+      561,
+      498,
+      984,
+      788,
+      1150
+    ],
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.98,
+      "macro_f1": 0.9802774457443597
+    },
+    "latency_p50_s": 0.284,
+    "latency_p95_s": 0.345,
+    "input_tokens_total": 634442,
     "accuracy_when_confidence_ge_0.8": 0.9946236559139785,
     "share_confidence_ge_0.8": 0.93
   }

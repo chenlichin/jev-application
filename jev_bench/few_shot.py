@@ -30,7 +30,7 @@ MAX_EXAMPLE_CHARS = 700
 MAX_EXAMPLE_TEXT = 600
 
 
-def _example_len(task: Task, row: pd.Series) -> int:
+def example_len(task: Task, row: pd.Series) -> int:
     return len(json.dumps(task.to_state(row), ensure_ascii=False))
 
 
@@ -39,7 +39,7 @@ def select_shots(task: Task, train: pd.DataFrame, k: int) -> pd.DataFrame:
     picked = []
     for label in task.labels:
         rows = train[train["label"] == label]
-        short = rows[[_example_len(task, r) <= MAX_EXAMPLE_CHARS for _, r in rows.iterrows()]]
+        short = rows[[example_len(task, r) <= MAX_EXAMPLE_CHARS for _, r in rows.iterrows()]]
         pool = short if len(short) >= k else rows
         picked.append(pool.sample(n=min(k, len(pool)), random_state=SEED))
     return pd.concat(picked)
