@@ -22,12 +22,14 @@ from jev_bench.tasks import Task
 CACHE_DIR = ROOT / ".cache" / "jev"
 
 
-def _wire_questions(task: Task) -> dict[str, Any]:
-    return {name: q.model_dump(mode="json") for name, q in task.questions.items()}
+def _wire_questions(questions: dict[str, Any]) -> dict[str, Any]:
+    return {name: q.model_dump(mode="json") for name, q in questions.items()}
 
 
-def request_payload(task: Task, row: pd.Series, model: str) -> dict[str, Any]:
-    return {"model": model, "state": task.to_state(row), "questions": _wire_questions(task)}
+def request_payload(task: Task, row: pd.Series, model: str, questions: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The request body for one row; ``questions`` defaults to the task's zero-shot questions."""
+    questions = task.questions if questions is None else questions
+    return {"model": model, "state": task.to_state(row), "questions": _wire_questions(questions)}
 
 
 def _key(payload: dict[str, Any]) -> str:
@@ -44,12 +46,15 @@ def _load_cache(path: Path) -> dict[str, dict[str, Any]]:
     return cache
 
 
-async def run_jev(task: Task, rows: pd.DataFrame, model: str, concurrency: int) -> list[dict[str, Any]]:
+async def run_jev(
+    task: Task, rows: pd.DataFrame, model: str, concurrency: int, questions: dict[str, Any] | None = None
+) -> list[dict[str, Any]]:
     """Return one record per row: ``{"answer", "latency_s", "usage"}`` or ``{"error"}``."""
+    questions = task.questions if questions is None else questions
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_path = CACHE_DIR / f"{task.name}.jsonl"
     cache = _load_cache(cache_path)
-    payloads = [request_payload(task, row, model) for _, row in rows.iterrows()]
+    payloads = [request_payload(task, row, model, questions) for _, row in rows.iterrows()]
     keys = [_key(p) for p in payloads]
     todo = [i for i, k in enumerate(keys) if k not in cache]
     print(f"[jev] {task.name}: {len(rows) - len(todo)} cached, {len(todo)} to request (model={model})")
@@ -67,7 +72,7 @@ async def run_jev(task: Task, rows: pd.DataFrame, model: str, concurrency: int) 
                     async with sem:
                         start = time.perf_counter()
                         try:
-                            resp = await client.system_one(p["state"], task.questions)
+                            resp = await client.system_one(p["state"], questions)
                             record = {
                                 "key": keys[i],
                                 "answer": resp.answers["label"].model_dump(mode="json"),

@@ -16,6 +16,7 @@
   },
   "jev": {
     "model": "jev-latest",
+    "shots_per_class": 0,
     "errors": 0,
     "jev_subset": {
       "n": 30,
@@ -45,5 +46,31 @@
       }
     },
     "state_example_label": "setosa"
+  },
+  "jev_3shot": {
+    "model": "jev-latest",
+    "shots_per_class": 3,
+    "errors": 0,
+    "shot_train_rows": [
+      54,
+      48,
+      47,
+      64,
+      53,
+      51,
+      57,
+      46,
+      43
+    ],
+    "jev_subset": {
+      "n": 30,
+      "accuracy": 0.9,
+      "macro_f1": 0.8976982097186701
+    },
+    "latency_p50_s": 0.281,
+    "latency_p95_s": 0.581,
+    "input_tokens_total": 27300,
+    "accuracy_when_confidence_ge_0.8": 0.9565217391304348,
+    "share_confidence_ge_0.8": 0.7666666666666667
   }
 }

@@ -20,6 +20,7 @@
   },
   "jev": {
     "model": "jev-latest",
+    "shots_per_class": 0,
     "errors": 0,
     "jev_subset": {
       "n": 179,
@@ -54,5 +55,28 @@
       }
     },
     "state_example_label": "0"
+  },
+  "jev_3shot": {
+    "model": "jev-latest",
+    "shots_per_class": 3,
+    "errors": 0,
+    "shot_train_rows": [
+      421,
+      128,
+      552,
+      80,
+      306,
+      208
+    ],
+    "jev_subset": {
+      "n": 179,
+      "accuracy": 0.6815642458100558,
+      "macro_f1": 0.6442096453603934,
+      "f1_positive": 0.5289256198347108,
+      "roc_auc": 0.7829380764163373
+    },
+    "latency_p50_s": 0.273,
+    "latency_p95_s": 0.512,
+    "input_tokens_total": 201955
   }
 }
