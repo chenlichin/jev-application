@@ -31,6 +31,7 @@ MAX_TEXT_CHARS = 4000
 class Task:
     name: str
     kaggle: str
+    problem: str  # what the Kaggle task asks, for the summary table
     kind: str  # "binary" or "multiclass"
     labels: list[Any]
     make_baseline: Callable[[], Any]
@@ -104,6 +105,7 @@ def _titanic_state(row: pd.Series) -> dict[str, Any]:
 TITANIC = Task(
     name="titanic",
     kaggle="https://www.kaggle.com/competitions/titanic",
+    problem="Predict whether a Titanic passenger survived",
     kind="binary",
     labels=[0, 1],
     make_baseline=_titanic_baseline,
@@ -132,6 +134,7 @@ def _text(df: pd.DataFrame) -> pd.Series:
 SMS_SPAM = Task(
     name="sms_spam",
     kaggle="https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset",
+    problem="Detect whether an SMS message is spam",
     kind="binary",
     labels=[0, 1],
     make_baseline=lambda: make_pipeline(TfidfVectorizer(sublinear_tf=True), MultinomialNB(alpha=0.1)),
@@ -158,6 +161,7 @@ SMS_SPAM = Task(
 IMDB = Task(
     name="imdb",
     kaggle="https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews",
+    problem="Classify a movie review as positive or negative",
     kind="binary",
     labels=[0, 1],
     make_baseline=lambda: make_pipeline(
@@ -186,6 +190,7 @@ BBC_LABELS = ["business", "entertainment", "politics", "sport", "tech"]
 BBC_NEWS = Task(
     name="bbc_news",
     kaggle="https://www.kaggle.com/competitions/learn-ai-bbc",
+    problem="Assign a BBC News article to one of 5 sections",
     kind="multiclass",
     labels=BBC_LABELS,
     make_baseline=lambda: make_pipeline(TfidfVectorizer(sublinear_tf=True, min_df=2), LinearSVC(C=1.0)),
@@ -214,6 +219,7 @@ IRIS_FEATURES = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
 IRIS = Task(
     name="iris",
     kaggle="https://www.kaggle.com/datasets/uciml/iris",
+    problem="Identify the iris species from 4 flower measurements",
     kind="multiclass",
     labels=["setosa", "versicolor", "virginica"],
     make_baseline=lambda: make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)),

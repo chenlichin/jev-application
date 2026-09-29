@@ -2,7 +2,7 @@
   "kaggle": "https://www.kaggle.com/competitions/titanic",
   "baseline": {
     "model": "HistGradientBoosting + Title/FamilySize/HasCabin feature engineering",
-    "fit_seconds": 0.37,
+    "fit_seconds": 0.34,
     "full_test": {
       "n": 179,
       "accuracy": 0.8212290502793296,
@@ -31,5 +31,28 @@
     "latency_p50_s": 0.287,
     "latency_p95_s": 0.364,
     "input_tokens_total": 80056
+  },
+  "pipeline": {
+    "problem": "Predict whether a Titanic passenger survived",
+    "n_jev_subset": 179,
+    "n_full_test": 179,
+    "n_train": 712,
+    "question_type": "Noul",
+    "question": "`passenger` describes a person aboard the RMS Titanic when it sank on 15 April 1912. Based on this profile and what is known about who reached the lifeboats, did this passenger survive?",
+    "answers": "yes / no",
+    "state_example": {
+      "passenger": {
+        "ticket_class": "3rd (lower)",
+        "sex": "male",
+        "title": "Mr",
+        "age_years": 24.0,
+        "siblings_or_spouses_aboard": 2,
+        "parents_or_children_aboard": 0,
+        "fare_paid_gbp": 24.15,
+        "has_recorded_cabin": false,
+        "port_of_embarkation": "Southampton"
+      }
+    },
+    "state_example_label": "0"
   }
 }

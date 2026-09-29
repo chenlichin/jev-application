@@ -27,5 +27,23 @@
     "input_tokens_total": 11910,
     "accuracy_when_confidence_ge_0.8": 1.0,
     "share_confidence_ge_0.8": 0.3333333333333333
+  },
+  "pipeline": {
+    "problem": "Identify the iris species from 4 flower measurements",
+    "n_jev_subset": 30,
+    "n_full_test": 30,
+    "n_train": 120,
+    "question_type": "Choice",
+    "question": "`flower_measurements_cm` are measurements of one iris flower. Which species is it?",
+    "answers": "setosa / versicolor / virginica",
+    "state_example": {
+      "flower_measurements_cm": {
+        "sepal_length": 4.4,
+        "sepal_width": 3.0,
+        "petal_length": 1.3,
+        "petal_width": 0.2
+      }
+    },
+    "state_example_label": "setosa"
   }
 }
