@@ -167,6 +167,15 @@ def _cell(text: str) -> str:
     return " ".join(text.split()).replace("|", "\\|")
 
 
+def _underline(text: str) -> str:
+    """Underline with a combining low line (U+0332) after each character.
+
+    Markdown has no underline syntax and some viewers do not render HTML such as <ins>,
+    so the underline is carried by the text itself.
+    """
+    return "".join(ch + "\u0332" for ch in text)
+
+
 def _row(cells: list[str]) -> str:
     return "| " + " | ".join(_cell(c) for c in cells) + " |"
 
@@ -204,8 +213,7 @@ def metric_table(all_results: dict[str, dict[str, Any]], metric: str) -> list[st
         scores = [base, *(res.get(key, {}).get("jev_subset", {}).get(metric) for key, _ in methods)]
         # Compared at the displayed precision, so scores that print the same are marked the same.
         best = max(round(v, 3) for v in scores if v is not None)
-        # Markdown has no underline, so the best score is also wrapped in <ins>, which GitHub underlines.
-        cells = ["—" if v is None else f"<ins>**{v:.3f}**</ins>" if round(v, 3) == best else f"{v:.3f}" for v in scores]
+        cells = ["—" if v is None else f"**{_underline(f'{v:.3f}')}**" if round(v, 3) == best else f"{v:.3f}" for v in scores]
         full = res.get("baseline", {}).get("full_test", {}).get(metric)
         rows.append(_row([name, str(p["n_jev_subset"]), *cells, "—" if full is None else f"{full:.3f}"]))
     return rows
