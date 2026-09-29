@@ -35,9 +35,9 @@ jev-bench all --concurrency 16          # 完整實驗：Kaggle、所有 Jev 方
 
 結果會寫進 `results/`，報告在 [`results/summary.md`](results/summary.md)。
 
-> **成本**：完整實驗約 6 萬次 Jev 呼叫、約 5,300 萬 input tokens，其中 IMDB（每種方法 10,000 筆）佔大部分。
-> 想先試水溫可以加 `--scored-n 200`（每題只抽 200 筆測試資料）或 `--tasks titanic iris`。
-> 答案會快取在 `.cache/jev/`，中斷後重跑只會補送沒回答過的資料。
+> **成本**：整個實驗實際花費 **約 US$2.8**（約 6 萬次 Jev 呼叫、6,730 萬 input tokens），其中 IMDB 佔約 7 成，
+> 細項見[成本](#成本)。想先試水溫可以加 `--scored-n 200`（每題只抽 200 筆測試資料）或 `--tasks titanic iris`。
+> 答案會快取在 `.cache/jev/`，中斷後重跑只會補送沒回答過的資料，不會重複計費。
 
 ## 指令
 
@@ -258,6 +258,42 @@ Kaggle 模型分數 ───► 同一個第二階段邏輯迴歸 ─► 「Sta
 | Titanic（cluster） | 1.67 | 0.56 | 主要相信 Kaggle |
 
 哪一邊單獨比較準，第二階段就給它較高的權重。
+
+### 成本
+
+整個實驗（含所有 Jev 方法與 stacking）實際花費 **約 US$2.8**。
+
+| 項目 | 數量 |
+| --- | ---: |
+| 成功的 Jev 呼叫 | 59,717 次 |
+| Input tokens | 6,729 萬 |
+| Output tokens | 140 萬 |
+| 平均每 100 萬 input tokens | 約 US$0.042 |
+| 平均每 1,000 次呼叫 | 約 US$0.047 |
+
+以下依 input tokens 按比例分攤（output tokens 只佔約 2%，所以按 input 分攤；是估算，不是帳單明細）：
+
+| 題目 | 呼叫次數 | Input tokens | 估計花費 |
+| --- | ---: | ---: | ---: |
+| IMDB | 43,988 | 4,827 萬 | ~US$2.01 |
+| BBC News | 5,261 | 1,154 萬 | ~US$0.48 |
+| SMS Spam | 8,267 | 575 萬 | ~US$0.24 |
+| Titanic | 1,846 | 152 萬 | ~US$0.06 |
+| Iris | 355 | 21 萬 | ~US$0.01 |
+
+依方法看（只算測試集，5 題合計）：
+
+| 方法 | Input tokens | 估計花費 | 相對 0-shot |
+| --- | ---: | ---: | ---: |
+| Jev 0-shot | 715 萬 | ~US$0.30 | ×1 |
+| Jev 3-shot | 1,683 萬 | ~US$0.70 | ×2.4 |
+| Jev cluster | 1,493 萬 | ~US$0.62 | ×2.1 |
+| 隨機對照 | 1,441 萬 | ~US$0.60 | ×2.0 |
+
+其餘約 US$0.58（1,398 萬 tokens）是 stacking 在訓練資料上的呼叫（每題最多 2,000 筆 × 0-shot、cluster 兩種特徵；BBC 的 cluster 請求特別長）。
+
+換算成實際用途：**用 Jev 0-shot 分類 10,000 則 IMDB 影評約 US$0.26**（每則約 620 tokens），
+不需要任何訓練資料，準確率 0.963。文字題加例子會讓成本變成 2–3.5 倍，但準確率沒有提升，所以 0-shot 最划算。
 
 ### 結論
 
