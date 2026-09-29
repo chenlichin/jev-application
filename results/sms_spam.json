@@ -20,7 +20,7 @@
   },
   "jev": {
     "model": "jev-latest",
-    "shots_per_class": 0,
+    "shots": "0",
     "errors": 0,
     "jev_subset": {
       "n": 200,
@@ -48,8 +48,12 @@
   },
   "jev_3shot": {
     "model": "jev-latest",
-    "shots_per_class": 3,
+    "shots": "3",
     "errors": 0,
+    "examples_per_label": {
+      "0": 3,
+      "1": 3
+    },
     "shot_train_rows": [
       2118,
       1427,
@@ -68,5 +72,192 @@
     "latency_p50_s": 0.275,
     "latency_p95_s": 0.367,
     "input_tokens_total": 149634
+  },
+  "jev_cluster": {
+    "model": "jev-latest",
+    "shots": "cluster",
+    "errors": 0,
+    "examples_per_label": {
+      "0": 8,
+      "1": 5
+    },
+    "shot_train_rows": [
+      2784,
+      924,
+      256,
+      4227,
+      3231,
+      276,
+      307,
+      3669,
+      2397,
+      2375,
+      1513,
+      1214,
+      3574
+    ],
+    "clustering": {
+      "k": 8,
+      "silhouette": {
+        "2": 0.0198,
+        "3": 0.0269,
+        "4": 0.031,
+        "5": 0.0365,
+        "6": 0.0437,
+        "7": 0.047,
+        "8": 0.0478
+      },
+      "min_cell_size": 3,
+      "cells": [
+        {
+          "label": "0",
+          "cluster": 0,
+          "cell_size": 620,
+          "cluster_size": 622,
+          "label_share_of_cluster": 0.997,
+          "train_row": 2784
+        },
+        {
+          "label": "0",
+          "cluster": 1,
+          "cell_size": 192,
+          "cluster_size": 192,
+          "label_share_of_cluster": 1.0,
+          "train_row": 924
+        },
+        {
+          "label": "0",
+          "cluster": 2,
+          "cell_size": 51,
+          "cluster_size": 482,
+          "label_share_of_cluster": 0.106,
+          "train_row": 256
+        },
+        {
+          "label": "0",
+          "cluster": 3,
+          "cell_size": 367,
+          "cluster_size": 381,
+          "label_share_of_cluster": 0.963,
+          "train_row": 4227
+        },
+        {
+          "label": "0",
+          "cluster": 4,
+          "cell_size": 133,
+          "cluster_size": 185,
+          "label_share_of_cluster": 0.719,
+          "train_row": 3231
+        },
+        {
+          "label": "0",
+          "cluster": 5,
+          "cell_size": 2011,
+          "cluster_size": 2085,
+          "label_share_of_cluster": 0.965,
+          "train_row": 276
+        },
+        {
+          "label": "0",
+          "cluster": 6,
+          "cell_size": 184,
+          "cluster_size": 185,
+          "label_share_of_cluster": 0.995,
+          "train_row": 307
+        },
+        {
+          "label": "0",
+          "cluster": 7,
+          "cell_size": 301,
+          "cluster_size": 325,
+          "label_share_of_cluster": 0.926,
+          "train_row": 3669
+        },
+        {
+          "label": "1",
+          "cluster": 2,
+          "cell_size": 431,
+          "cluster_size": 482,
+          "label_share_of_cluster": 0.894,
+          "train_row": 2397
+        },
+        {
+          "label": "1",
+          "cluster": 3,
+          "cell_size": 14,
+          "cluster_size": 381,
+          "label_share_of_cluster": 0.037,
+          "train_row": 2375
+        },
+        {
+          "label": "1",
+          "cluster": 4,
+          "cell_size": 52,
+          "cluster_size": 185,
+          "label_share_of_cluster": 0.281,
+          "train_row": 1513
+        },
+        {
+          "label": "1",
+          "cluster": 5,
+          "cell_size": 74,
+          "cluster_size": 2085,
+          "label_share_of_cluster": 0.035,
+          "train_row": 1214
+        },
+        {
+          "label": "1",
+          "cluster": 7,
+          "cell_size": 24,
+          "cluster_size": 325,
+          "label_share_of_cluster": 0.074,
+          "train_row": 3574
+        }
+      ]
+    },
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.975,
+      "macro_f1": 0.9472990777338604,
+      "f1_positive": 0.9090909090909091,
+      "roc_auc": 0.9744166131449369
+    },
+    "latency_p50_s": 0.285,
+    "latency_p95_s": 0.378,
+    "input_tokens_total": 177434
+  },
+  "jev_cluster_random": {
+    "model": "jev-latest",
+    "shots": "cluster-random",
+    "errors": 0,
+    "examples_per_label": {
+      "0": 8,
+      "1": 5
+    },
+    "shot_train_rows": [
+      2118,
+      1427,
+      3042,
+      2778,
+      4050,
+      3108,
+      1084,
+      3466,
+      815,
+      2245,
+      4235,
+      596,
+      1481
+    ],
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.975,
+      "macro_f1": 0.9472990777338604,
+      "f1_positive": 0.9090909090909091,
+      "roc_auc": 0.9736673089274245
+    },
+    "latency_p50_s": 0.284,
+    "latency_p95_s": 0.387,
+    "input_tokens_total": 200634
   }
 }

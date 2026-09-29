@@ -5,6 +5,11 @@ Usage:
     python run_benchmark.py --mode dry-run                # write example Jev requests, no API calls
     TYPESAFE_API_KEY=... python run_benchmark.py --mode both --jev-n 200
     TYPESAFE_API_KEY=... python run_benchmark.py --mode jev --shots 0 3   # zero-shot and 3 examples per class
+    TYPESAFE_API_KEY=... python run_benchmark.py --mode jev --shots cluster cluster-random
+
+Shot variants: an integer k draws k random training examples per class; "cluster" takes one
+example per (label, k-means cluster) cell; "cluster-random" is its control, with the same
+per-label counts drawn at random.
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
 from jev_bench.datasets import ROOT, split
+from jev_bench.cluster_shots import select_cluster_shots, select_matched_random
 from jev_bench.few_shot import few_shot_questions, select_shots
 from jev_bench.jev_runner import request_payload, run_jev
 from jev_bench.tasks import TASKS, Task, positive_scores
@@ -26,15 +32,46 @@ from jev_bench.tasks import TASKS, Task, positive_scores
 RESULTS_DIR = ROOT / "results"
 
 
-def jev_key(shots: int) -> str:
+CLUSTER_VARIANTS = {"cluster": ("jev_cluster", "Jev cluster-shot"), "cluster-random": ("jev_cluster_random", "Jev matched random")}
+
+
+def jev_key(variant: str) -> str:
     """Results key for a Jev run; zero-shot keeps the original "jev" key."""
-    return "jev" if shots == 0 else f"jev_{shots}shot"
+    if variant in CLUSTER_VARIANTS:
+        return CLUSTER_VARIANTS[variant][0]
+    return "jev" if int(variant) == 0 else f"jev_{int(variant)}shot"
 
 
 def jev_methods(all_results: dict[str, dict[str, Any]]) -> list[tuple[str, str]]:
-    """(results key, column label) for every Jev variant present in any task, zero-shot first."""
-    shots = sorted({0 if k == "jev" else int(k[4:-4]) for res in all_results.values() for k in res if k.startswith("jev")})
-    return [(jev_key(k), "Jev 0-shot" if k == 0 else f"Jev {k}-shot") for k in shots]
+    """(results key, column label) for every Jev variant present in any task, in a fixed order."""
+    present = {k for res in all_results.values() for k in res if k.startswith("jev")}
+    shot_keys = sorted((k for k in present if k == "jev" or k.endswith("shot") and k[4:-4].isdigit()),
+                       key=lambda k: 0 if k == "jev" else int(k[4:-4]))
+    methods = [(k, "Jev 0-shot" if k == "jev" else f"Jev {k[4:-4]}-shot") for k in shot_keys]
+    return methods + [(key, label) for key, label in CLUSTER_VARIANTS.values() if key in present]
+
+
+class ShotPlanner:
+    """Builds each variant's examples for one task; the cluster selection is computed once and reused."""
+
+    def __init__(self, task: Task, data) -> None:
+        self.task, self.data = task, data
+        self._cluster: tuple[Any, dict[str, Any]] | None = None
+
+    def cluster(self) -> tuple[Any, dict[str, Any]]:
+        if self._cluster is None:
+            self._cluster = select_cluster_shots(self.task, self.data.train)
+        return self._cluster
+
+    def shots(self, variant: str) -> tuple[Any | None, dict[str, Any]]:
+        """(training rows used as examples or None for zero-shot, extra info for the results file)."""
+        if variant == "cluster":
+            rows, info = self.cluster()
+            return rows, {"clustering": info}
+        if variant == "cluster-random":
+            return select_matched_random(self.task, self.data.train, self.cluster()[0]), {}
+        k = int(variant)
+        return (select_shots(self.task, self.data.train, k) if k else None), {}
 
 
 def metrics(task: Task, y_true: Any, y_pred: Any, y_score: Any | None) -> dict[str, float]:
@@ -63,19 +100,18 @@ def run_baseline(task: Task, data) -> dict[str, Any]:
     return result
 
 
-def run_jev_eval(task: Task, data, model: str, concurrency: int, shots: int) -> dict[str, Any]:
-    questions = task.questions
-    shot_rows = None
-    if shots:
-        shot_rows = select_shots(task, data.train, shots)
-        questions = few_shot_questions(task, shot_rows)
+def run_jev_eval(task: Task, data, model: str, concurrency: int, variant: str, planner: ShotPlanner) -> dict[str, Any]:
+    shot_rows, extra = planner.shots(variant)
+    questions = task.questions if shot_rows is None else few_shot_questions(task, shot_rows)
     records = asyncio.run(run_jev(task, data.jev_test, model, concurrency, questions))
     ok = [(i, r) for i, r in enumerate(records) if "error" not in r]
     errors = [r["error"] for r in records if "error" in r]
-    result: dict[str, Any] = {"model": model, "shots_per_class": shots, "errors": len(errors)}
+    result: dict[str, Any] = {"model": model, "shots": variant, "errors": len(errors)}
     if shot_rows is not None:
+        result["examples_per_label"] = {str(k): int(v) for k, v in shot_rows["label"].value_counts().sort_index().items()}
         # Training-row indices, so the exact examples can be reproduced and checked against the test set.
         result["shot_train_rows"] = [int(i) for i in shot_rows.index]
+    result.update(extra)
     if errors:
         result["error_examples"] = sorted(set(errors))[:3]
     if not ok:
@@ -194,7 +230,7 @@ def write_summary() -> None:
     for name, res in all_results.items():
         for key, label in methods:
             if key in res:
-                details = {k: v for k, v in res[key].items() if k not in ("jev_subset", "shot_train_rows")}
+                details = {k: v for k, v in res[key].items() if k not in ("jev_subset", "shot_train_rows", "clustering")}
                 lines.append(f"- **{name}** {label} details: `{json.dumps(details, ensure_ascii=False)}`")
     (RESULTS_DIR / "summary.md").write_text("\n".join(lines) + "\n")
 
@@ -206,8 +242,13 @@ def main() -> None:
     parser.add_argument("--jev-n", type=int, default=200, help="test rows per task sent to Jev (stratified); 0 = all")
     parser.add_argument("--model", default="jev-latest")
     parser.add_argument("--concurrency", type=int, default=8)
-    parser.add_argument("--shots", type=int, nargs="+", default=[0], help="labeled examples per class; e.g. --shots 0 3")
+    parser.add_argument(
+        "--shots", nargs="+", default=["0"], help="shot variants: integers (examples per class), cluster, cluster-random"
+    )
     args = parser.parse_args()
+    for variant in args.shots:
+        if variant not in CLUSTER_VARIANTS and not variant.isdigit():
+            parser.error(f"--shots: unknown variant {variant!r}")
 
     RESULTS_DIR.mkdir(exist_ok=True)
     jev_n = None if args.jev_n == 0 else args.jev_n
@@ -219,11 +260,13 @@ def main() -> None:
         res: dict[str, Any] = json.loads(path.read_text()) if path.exists() else {}
         res["kaggle"] = task.kaggle
         res["pipeline"] = describe_pipeline(task, data)
+        planner = ShotPlanner(task, data)
         if args.mode == "dry-run":
-            for shots in args.shots:
-                questions = few_shot_questions(task, select_shots(task, data.train, shots)) if shots else None
+            for variant in args.shots:
+                shot_rows, _ = planner.shots(variant)
+                questions = None if shot_rows is None else few_shot_questions(task, shot_rows)
                 example = request_payload(task, data.jev_test.iloc[0], args.model, questions)
-                suffix = "" if shots == 0 else f"_{shots}shot"
+                suffix = jev_key(variant)[3:]
                 out = RESULTS_DIR / f"{name}_request_example{suffix}.json"
                 out.write_text(json.dumps(example, indent=2, ensure_ascii=False))
                 print(f"[dry-run] wrote {out.name} ({len(json.dumps(example))} chars)")
@@ -232,9 +275,9 @@ def main() -> None:
             res["baseline"] = run_baseline(task, data)
             print("[baseline]", json.dumps(res["baseline"]["jev_subset"]))
         if args.mode in ("jev", "both"):
-            for shots in args.shots:
-                key = jev_key(shots)
-                res[key] = run_jev_eval(task, data, args.model, args.concurrency, shots)
+            for variant in args.shots:
+                key = jev_key(variant)
+                res[key] = run_jev_eval(task, data, args.model, args.concurrency, variant, planner)
                 print(f"[{key}]", json.dumps(res[key].get("jev_subset"), ensure_ascii=False), "errors:", res[key]["errors"])
         path.write_text(json.dumps(res, indent=2, ensure_ascii=False))
 

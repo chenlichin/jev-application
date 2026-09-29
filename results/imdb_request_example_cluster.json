@@ -1,0 +1,36 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "review": "Without reiterating what was said above about this movie, I would like to add that I was looking forward to watching this film...the cast/location and the work of the excellent director Michael Winterbottom etc...It had a vague shadow of 'Don't look Now' about the storyline from the beginning. A stay in different surroundings (Italy again) to dim the heartbreak of loss...or perhaps that's how I saw it? So consequently I sat there waiting for the story to unfold and put a spin on what we expect to happen to this family in a foreign European country....and I sat there and sat there....and guess what? nothing actually happens! and I mean nothing!! You are not even given the chance to get into the characters as they are so 1 dimensional and vacuous..You are led to believe from the pace of the movie that something was going to happen to turn the whole film on it's head...The eldest daughters flirtation with the local vespa boys, had great scope to take the movie in another direction, the youngest daughters visions of her dead mother ended up being a fruitless and pointless exercise, the fathers attempts at being seduced by one of his female students felt ridiculous given his age. It felt as if the script had a last recall made where they decided at the last minute to eradicated any guts to the story and went for paring it down to a bare minimum to no effect. When the credits started to roll (unexpectedly) you can't help but feel robbed of your time spent sat watching this pile of rubbish."
+  },
+  "questions": {
+    "label": {
+      "type": "noul",
+      "instructions": "Is `review` a positive review overall, meaning the reviewer recommends the movie?",
+      "criteria": {
+        "true": {
+          "description": "Overall positive: the reviewer liked the movie, even if they mention some flaws.",
+          "examples": [
+            {
+              "review": "My sister, dad, and I are really into D&D and one night we were browsing Netflix looking for a movie to watch when this one came up. We thought we would try it out and I ended up almost dying from laughter. The writing and acting in this movie is so amazing! Witty characters, great interaction, and hilarious moments kept us in stitches the entire time. I love this movie! It might not make that much sense for those who don't know about Dungeons & Dragons, but nevertheless, it is a good movie. This only goes to show that movies don't need an astronomical budget and big name actors/actresses to b …"
+            },
+            {
+              "review": "We really enjoyed Grey Owl: a simple tale well told in classic Attenborough fashion: a little over-romanticized, with archetypes, humor, and a stress of dignity and values.  Beautifully shot and told at a nice pace this is the true story of Archie, an Englishman who turned native Indian, and went to live and trap in Canada.  Solid performances from all makes this film with a message easy viewing.  Two of the stars of the film are without a doubt the cutest we have ever seen - and the message is a good one with its ecoleanings. It must have been great to meet or read Grey Owl in the 1930s, a un …"
+            }
+          ]
+        },
+        "false": {
+          "description": "Overall negative: the reviewer disliked the movie, even if they mention some good points.",
+          "examples": [
+            {
+              "review": "So pathetic its not even funny. From the first scene in the movie I knew I was in for a bad time. Thank goodness I only saw this movie on tv. The story line was terrible, not to mention the acting. It was horrid. Very unreal and unusual things happened in this move such as. The lady sticks a whip under the door and whips the guy a little and he just hands over the keys. I'm like, GET REAL. The creators lousy attempt to make a futuristic city even deepened my dislike for the film. To tell you the truth the only good thing in this movie at all was the fighting, which was in itself pretty lame. A …"
+            },
+            {
+              "review": "Once again Bronson's talent is mostly wasted on this shock value 1984 thriller which (uncut) is far more disturbing than most of what is out even today. The fact that \"The Evil That Men Do\" is very disturbing (in its verbal and visual depictions of torture) is not the problem. It is the shameless gratuity in which it is presented. Interestingly, this film seems to symbolize that latter part of Bronson's career in which he has tortured many of his fans with the same egregiously predictable and uncreative plots. One hopes this fine actor will rise again."
+            }
+          ]
+        }
+      }
+    }
+  }
+}
