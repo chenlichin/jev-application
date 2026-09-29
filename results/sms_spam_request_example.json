@@ -1,0 +1,16 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "sms": "Aight I'll grab something to eat too, text me when you're back at mu"
+  },
+  "questions": {
+    "label": {
+      "type": "noul",
+      "instructions": "Is `sms` a spam text message?",
+      "criteria": {
+        "true": "Unsolicited bulk or commercial message: prize or lottery claims, premium-rate numbers, marketing offers, subscription services, or scams.",
+        "false": "An ordinary personal or transactional message between people who know each other, including informal chat with slang or abbreviations."
+      }
+    }
+  }
+}

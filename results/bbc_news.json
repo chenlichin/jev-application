@@ -1,0 +1,17 @@
+{
+  "kaggle": "https://www.kaggle.com/competitions/learn-ai-bbc",
+  "baseline": {
+    "model": "TF-IDF + Linear SVM",
+    "fit_seconds": 0.43,
+    "full_test": {
+      "n": 445,
+      "accuracy": 0.9865168539325843,
+      "macro_f1": 0.9861360064818323
+    },
+    "jev_subset": {
+      "n": 200,
+      "accuracy": 0.99,
+      "macro_f1": 0.9896404891828233
+    }
+  }
+}
