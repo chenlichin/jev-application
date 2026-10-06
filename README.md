@@ -67,6 +67,7 @@ jev-bench all --concurrency 16          # 完整實驗：Kaggle、所有 Jev 方
 每個指令只會更新自己負責的結果，所以可以分開跑、任意組合；`report` 永遠讀取所有已存在的結果。
 
 ## 專案結構
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a11e486a-0f1e-413b-a90a-a4bba83fd7c2" />
 
 ```
 jev_bench/
